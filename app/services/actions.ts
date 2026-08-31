@@ -11,12 +11,16 @@ export async function createServiceOrder(formData: FormData) {
   const kind = String(formData.get("kind") ?? "");
   const recipient = String(formData.get("recipient") ?? "").trim();
   const productCode = String(formData.get("product_code") ?? "").trim();
+  const pin = String(formData.get("pin") ?? "").trim();
   const returnToRaw = String(formData.get("return_to") ?? "/services");
   const returnTo = allowedReturnPaths.has(returnToRaw) ? returnToRaw : "/services";
   const amountNgn = Number(String(formData.get("amount") ?? "0").replace(/,/g, ""));
 
   if (!allowedKinds.has(kind) || !recipient) {
     redirect(`${returnTo}?error=${encodeURIComponent("Check the recipient and product then try again.")}`);
+  }
+  if (!/^\d{6}$/.test(pin)) {
+    redirect(`${returnTo}?error=${encodeURIComponent("Enter your 6-digit transaction PIN.")}`);
   }
   if (kind === "data" && !productCode) {
     redirect(`${returnTo}?error=${encodeURIComponent("Choose an available data plan.")}`);
@@ -35,6 +39,7 @@ export async function createServiceOrder(formData: FormData) {
     p_recipient: recipient,
     p_product_code: productCode,
     p_idempotency_key: randomUUID(),
+    p_pin: pin,
   });
 
   if (error) redirect(`${returnTo}?error=${encodeURIComponent(error.message)}`);
