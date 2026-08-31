@@ -28,13 +28,20 @@ export async function register(formData: FormData) {
   const fullName = value(formData, "full_name");
   const email = value(formData, "email").toLowerCase();
   const password = value(formData, "password");
+  const referralCode = value(formData, "referral_code").toUpperCase();
   if (fullName.length < 2) redirect("/register?error=Enter%20your%20full%20name");
   if (!email || password.length < 8) redirect("/register?error=Use%20a%20valid%20email%20and%20at%20least%208%20characters%20for%20your%20password");
+  if (referralCode && !/^[A-Z0-9]{6,24}$/.test(referralCode)) redirect(`/register?error=${encodeURIComponent("Referral code format is invalid.")}`);
   const supabase = await createClient();
+  if (referralCode) {
+    const { data: referral } = await supabase.from("referral_codes").select("code").eq("code", referralCode).maybeSingle();
+    // RLS intentionally prevents anonymous code enumeration. The database trigger validates attribution again after signup.
+    void referral;
+  }
   const { error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName } },
+    options: { data: { full_name: fullName, ...(referralCode ? { referral_code: referralCode } : {}) } },
   });
   if (error) redirect(`/register?error=${encodeURIComponent(error.message)}`);
   redirect("/login?message=Check%20your%20email%20to%20confirm%20your%20account");
@@ -48,7 +55,6 @@ export async function requestPasswordReset(formData: FormData) {
     redirectTo: `${appUrl()}/auth/recovery`,
   });
   if (error) redirect(`/forgot-password?error=${encodeURIComponent(error.message)}`);
-  // Deliberately use the same response regardless of whether the account exists.
   redirect(`/forgot-password?message=${encodeURIComponent("If an account exists for that email, a password reset link has been sent.")}`);
 }
 
