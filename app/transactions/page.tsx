@@ -6,6 +6,10 @@ import { createClient } from "../../lib/supabase/server";
 const positiveKinds = new Set(["deposit", "refund"]);
 function money(minor: number, currency: string) { return new Intl.NumberFormat("en-NG", { style: "currency", currency, minimumFractionDigits: 2 }).format(minor / 100); }
 function humanize(value: string) { return value.replaceAll("_", " ").replace(/\b\w/g, c => c.toUpperCase()); }
+function isIncomingTransfer(kind: string, metadata: unknown) {
+  if (kind !== "transfer" || !metadata || typeof metadata !== "object" || Array.isArray(metadata)) return false;
+  return (metadata as Record<string, unknown>).direction === "incoming";
+}
 
 export default async function TransactionsPage({ searchParams }: { searchParams?: Promise<{ message?: string }> }) {
   const params = (await searchParams) ?? {};
@@ -16,7 +20,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams?
 
   const { data: rows, error } = await supabase
     .from("transactions")
-    .select("id,kind,status,amount_minor,fee_minor,currency,reference,created_at")
+    .select("id,kind,status,amount_minor,fee_minor,currency,reference,created_at,metadata")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(100);
@@ -30,8 +34,9 @@ export default async function TransactionsPage({ searchParams }: { searchParams?
           {error ? <div className="rounded-2xl border border-rose-400/20 bg-rose-400/8 p-4 text-sm text-rose-200">Unable to load transactions right now.</div> : null}
           <div className="divide-y divide-white/6">
             {(rows ?? []).length === 0 ? <div className="py-14 text-center"><p className="text-sm font-semibold">No transactions yet</p><p className="muted mt-2 text-xs">Completed payments, deposits and transfers will appear here.</p></div> : (rows ?? []).map(tx => {
-              const positive = positiveKinds.has(tx.kind);
-              return <div key={tx.id} className="flex items-center justify-between gap-4 py-4"><div className="flex min-w-0 items-center gap-3"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-cyan-300/8 text-cyan-300"><ReceiptText size={18}/></div><div className="min-w-0"><p className="truncate text-sm font-semibold">{humanize(tx.kind)}</p><p className="muted mt-1 truncate text-[11px]">{tx.reference} · {new Date(tx.created_at).toLocaleString("en-NG")}</p></div></div><div className="text-right"><p className={`text-sm font-bold ${positive ? "text-emerald-300" : ""}`}>{positive ? "+" : "-"}{money(Number(tx.amount_minor), tx.currency)}</p><p className={`mt-1 text-[10px] ${tx.status === "successful" ? "text-emerald-300/80" : tx.status === "failed" ? "text-rose-300" : "text-amber-300"}`}>{humanize(tx.status)}{Number(tx.fee_minor) > 0 ? ` · Fee ${money(Number(tx.fee_minor), tx.currency)}` : ""}</p></div></div>;
+              const positive = positiveKinds.has(tx.kind) || isIncomingTransfer(tx.kind, tx.metadata);
+              const title = tx.kind === "transfer" ? (positive ? "Transfer received" : "Transfer sent") : humanize(tx.kind);
+              return <div key={tx.id} className="flex items-center justify-between gap-4 py-4"><div className="flex min-w-0 items-center gap-3"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-cyan-300/8 text-cyan-300"><ReceiptText size={18}/></div><div className="min-w-0"><p className="truncate text-sm font-semibold">{title}</p><p className="muted mt-1 truncate text-[11px]">{tx.reference} · {new Date(tx.created_at).toLocaleString("en-NG")}</p></div></div><div className="text-right"><p className={`text-sm font-bold ${positive ? "text-emerald-300" : ""}`}>{positive ? "+" : "-"}{money(Number(tx.amount_minor), tx.currency)}</p><p className={`mt-1 text-[10px] ${tx.status === "successful" ? "text-emerald-300/80" : tx.status === "failed" ? "text-rose-300" : "text-amber-300"}`}>{humanize(tx.status)}{Number(tx.fee_minor) > 0 ? ` · Fee ${money(Number(tx.fee_minor), tx.currency)}` : ""}</p></div></div>;
             })}
           </div>
         </section>
