@@ -3,7 +3,7 @@ import { ArrowRight, Mail, ShieldCheck } from "lucide-react";
 
 const nav = [
   { label: "Products", href: "/#products" },
-  { label: "Services", href: "/services" },
+  { label: "Services", href: "/#services" },
   { label: "Fees", href: "/fees" },
   { label: "Security", href: "/security" },
   { label: "About", href: "/about" },
@@ -26,17 +26,14 @@ export function PublicFooter() {
     <div className="mx-auto max-w-7xl px-5 py-14 md:px-8">
       <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.4fr_.8fr_.8fr_.8fr]">
         <div><Link href="/" className="flex items-center gap-2.5"><img src="/masanawa-mark.svg" alt="" className="h-10 w-10"/><span className="text-lg font-extrabold">Masanawa</span></Link><p className="mt-4 max-w-sm text-sm leading-7 text-slate-400">A unified wallet for payments, transfers, digital services and provider-backed digital assets.</p><div className="mt-5 flex items-center gap-2 text-xs text-slate-400"><ShieldCheck size={15} className="text-cyan-300"/>Security controls built into every transaction.</div></div>
-        <FooterGroup title="Product" links={[["Wallet","/wallet"],["Services","/services"],["Crypto","/crypto"],["Fees","/fees"]]}/>
+        <FooterGroup title="Product" links={[["Wallet","/#products"],["Services","/#services"],["Digital assets","/#products"],["Fees","/fees"]]}/>
         <FooterGroup title="Company" links={[["About","/about"],["Contact","/contact"],["Security","/security"],["Help center","/help"]]}/>
-        <FooterGroup title="Legal" links={[["Terms of Service","/terms"],["Privacy Notice","/privacy"],["Account security","/profile/security"],["Support","/profile/support"]]}/>
+        <FooterGroup title="Legal" links={[["Terms of Service","/terms"],["Privacy Notice","/privacy"],["Sign in","/login"],["Create account","/register"]]}/>
       </div>
       <div className="mt-12 flex flex-col gap-3 border-t border-white/7 pt-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between"><p>© {new Date().getFullYear()} Masanawa. All rights reserved.</p><Link href="/contact" className="inline-flex items-center gap-2 hover:text-cyan-300"><Mail size={14}/>Contact Masanawa</Link></div>
     </div>
   </footer>;
 }
 
-function FooterGroup({title,links}:{title:string;links:Array<[string,string]>}) {
-  return <div><p className="text-sm font-bold">{title}</p><div className="mt-4 space-y-3">{links.map(([label,href])=><Link key={label} href={href} className="block text-xs text-slate-400 transition hover:text-cyan-300">{label}</Link>)}</div></div>;
-}
-
+function FooterGroup({title,links}:{title:string;links:Array<[string,string]>}) { return <div><p className="text-sm font-bold">{title}</p><div className="mt-4 space-y-3">{links.map(([label,href])=><Link key={label} href={href} className="block text-xs text-slate-400 transition hover:text-cyan-300">{label}</Link>)}</div></div>; }
 export function PublicPage({children}:{children:React.ReactNode}) { return <><PublicHeader/><main>{children}</main><PublicFooter/></>; }
