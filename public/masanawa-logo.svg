@@ -1,0 +1,9 @@
+<svg width="238" height="64" viewBox="0 0 238 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g1" x1="4" y1="8" x2="60" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="#22D3EE"/><stop offset="1" stop-color="#2563EB"/></linearGradient>
+    <linearGradient id="g2" x1="32" y1="18" x2="32" y2="54" gradientUnits="userSpaceOnUse"><stop stop-color="#67E8F9"/><stop offset="1" stop-color="#0EA5E9"/></linearGradient>
+  </defs>
+  <path d="M4 14.5L16.6 25.1L28 15L39.4 25.1L52 14.5V49.5L42.4 41.6V28.2L28 40.8L13.6 28.2V41.6L4 49.5V14.5Z" fill="url(#g1)"/>
+  <path d="M22.8 29.2L28 33.8L33.2 29.2V50.8L28 55L22.8 50.8V29.2Z" fill="url(#g2)"/>
+  <text x="68" y="40" fill="#F8FBFF" font-family="Inter, Arial, sans-serif" font-size="25" font-weight="800" letter-spacing="-0.8">Masanawa</text>
+</svg>
