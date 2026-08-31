@@ -12,13 +12,15 @@ const config = {
 } as const;
 
 type Slug = keyof typeof config;
+type ServiceSearchParams = { error?: string };
 
 function money(minor: number) {
   return new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", minimumFractionDigits: 2 }).format(minor / 100);
 }
 
-export default async function ServiceDetailPage({params,searchParams}:{params:Promise<{slug:string}>;searchParams?:Promise<{error?:string}>}) {
-  const [{slug}, query] = await Promise.all([params, searchParams ?? Promise.resolve({})]);
+export default async function ServiceDetailPage({params,searchParams}:{params:Promise<{slug:string}>;searchParams?:Promise<ServiceSearchParams>}) {
+  const { slug } = await params;
+  const query: ServiceSearchParams = searchParams ? await searchParams : {};
   if (!(slug in config)) redirect("/services");
   const item = config[slug as Slug];
   const Icon=item.icon;
