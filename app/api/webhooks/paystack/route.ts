@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "../../../../lib/supabase/admin";
-import { verifyPaystackSignature } from "../../../../lib/providers/paystack";
+import { verifyPaystackSignature, verifyPaystackTransaction } from "../../../../lib/providers/paystack";
 
 type PaystackEvent = {
   event?: string;
@@ -44,8 +44,12 @@ export async function POST(request: Request) {
     payload: event,
   });
 
-  if (eventInsertError?.code === "23505") return NextResponse.json({ ok: true, duplicate: true });
-  if (eventInsertError) return NextResponse.json({ ok: false }, { status: 500 });
+  if (eventInsertError?.code === "23505") {
+    const { data: existing } = await admin.from("webhook_events").select("processed").eq("provider_code", "paystack").eq("event_id", eventId).maybeSingle();
+    if (existing?.processed) return NextResponse.json({ ok: true, duplicate: true });
+  } else if (eventInsertError) {
+    return NextResponse.json({ ok: false }, { status: 500 });
+  }
 
   if (event.event !== "charge.success" || event.data?.status !== "success" || !reference) {
     await admin.from("webhook_events").update({ processed: true, processed_at: new Date().toISOString() }).eq("provider_code", "paystack").eq("event_id", eventId);
@@ -63,9 +67,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false }, { status: 404 });
   }
 
-  const amountMinor = Number(event.data?.amount ?? -1);
-  if (event.data?.currency !== "NGN" || amountMinor !== Number(intent.amount_minor)) {
-    await admin.from("webhook_events").update({ error_message: "Amount or currency mismatch" }).eq("provider_code", "paystack").eq("event_id", eventId);
+  let verified;
+  try {
+    verified = await verifyPaystackTransaction(reference);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Paystack verification failed";
+    await admin.from("webhook_events").update({ error_message: message }).eq("provider_code", "paystack").eq("event_id", eventId);
+    return NextResponse.json({ ok: false }, { status: 502 });
+  }
+
+  const amountMinor = Number(verified.amount ?? -1);
+  if (verified.status !== "success" || verified.reference !== reference || verified.currency !== "NGN" || amountMinor !== Number(intent.amount_minor)) {
+    await admin.from("webhook_events").update({ error_message: "Verified transaction does not match funding intent" }).eq("provider_code", "paystack").eq("event_id", eventId);
     return NextResponse.json({ ok: false }, { status: 409 });
   }
 
@@ -88,6 +101,6 @@ export async function POST(request: Request) {
     }).eq("id", intent.id);
   }
 
-  await admin.from("webhook_events").update({ processed: true, processed_at: new Date().toISOString() }).eq("provider_code", "paystack").eq("event_id", eventId);
+  await admin.from("webhook_events").update({ processed: true, processed_at: new Date().toISOString(), error_message: null }).eq("provider_code", "paystack").eq("event_id", eventId);
   return NextResponse.json({ ok: true });
 }
