@@ -12,7 +12,7 @@
 }
 
 * { box-sizing: border-box; }
-html { background: var(--bg); }
+html { background: var(--bg); scroll-behavior: smooth; }
 body {
   margin: 0;
   background:
@@ -21,9 +21,12 @@ body {
     var(--bg);
   color: var(--text);
   min-height: 100vh;
+  text-rendering: optimizeLegibility;
 }
-button, input { font: inherit; }
+button, input, select, textarea { font: inherit; }
+button, summary, a { -webkit-tap-highlight-color: transparent; }
 a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 2px solid rgba(34,195,238,.9); outline-offset: 3px; }
 ::selection { background: rgba(34,195,238,.28); }
 
 .muted { color: var(--muted); }
@@ -39,6 +42,11 @@ a { color: inherit; text-decoration: none; }
 .glass {
   background: rgba(7,17,31,.76);
   backdrop-filter: blur(16px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
 
 ::-webkit-scrollbar { width: 8px; }
