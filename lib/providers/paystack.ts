@@ -36,6 +36,21 @@ export async function initializePaystackTransaction(input: { email: string; amou
   return payload.data;
 }
 
+export async function verifyPaystackTransaction(reference: string) {
+  const response = await fetch(`${baseUrl}/transaction/verify/${encodeURIComponent(reference)}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${secret()}` },
+    cache: "no-store",
+  });
+  const payload = await response.json() as {
+    status?: boolean;
+    message?: string;
+    data?: { id?: number; status?: string; reference?: string; amount?: number; currency?: string };
+  };
+  if (!response.ok || !payload.status || !payload.data) throw new Error(payload.message || "Paystack verification failed");
+  return payload.data;
+}
+
 export function verifyPaystackSignature(rawBody: string, signature: string | null) {
   if (!signature) return false;
   const expected = createHmac("sha512", secret()).update(rawBody).digest("hex");
