@@ -2,8 +2,8 @@ import Link from "next/link";
 import { ArrowRight, Mail, ShieldCheck } from "lucide-react";
 
 const nav = [
-  { label: "Products", href: "/#products" },
-  { label: "Services", href: "/#services" },
+  { label: "Products", href: "/products" },
+  { label: "Services", href: "/products#services" },
   { label: "Fees", href: "/fees" },
   { label: "Security", href: "/security" },
   { label: "About", href: "/about" },
@@ -26,7 +26,7 @@ export function PublicFooter() {
     <div className="mx-auto max-w-7xl px-5 py-14 md:px-8">
       <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.4fr_.8fr_.8fr_.8fr]">
         <div><Link href="/" className="flex items-center gap-2.5"><img src="/masanawa-mark.svg" alt="" className="h-10 w-10"/><span className="text-lg font-extrabold">Masanawa</span></Link><p className="mt-4 max-w-sm text-sm leading-7 text-slate-400">A unified wallet for payments, transfers, digital services and provider-backed digital assets.</p><div className="mt-5 flex items-center gap-2 text-xs text-slate-400"><ShieldCheck size={15} className="text-cyan-300"/>Security controls built into every transaction.</div></div>
-        <FooterGroup title="Product" links={[["Wallet","/#products"],["Services","/#services"],["Digital assets","/#products"],["Fees","/fees"]]}/>
+        <FooterGroup title="Product" links={[["Wallet","/products"],["Services","/products#services"],["Digital assets","/products"],["Fees","/fees"]]}/>
         <FooterGroup title="Company" links={[["About","/about"],["Contact","/contact"],["Security","/security"],["Help center","/help"]]}/>
         <FooterGroup title="Legal" links={[["Terms of Service","/terms"],["Privacy Notice","/privacy"],["Sign in","/login"],["Create account","/register"]]}/>
       </div>
