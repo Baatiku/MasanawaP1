@@ -18,7 +18,8 @@ Masanawa is a responsive fintech web application for wallet funding, transfers, 
 
 ## Core routes
 
-- `/` — authenticated dashboard
+- `/` — public Masanawa welcome page (signed-in users are redirected to `/dashboard`)
+- `/dashboard` — authenticated account overview
 - `/login` — sign in
 - `/register` — account creation
 - `/wallet` — live ledger-backed wallet
