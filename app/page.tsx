@@ -22,13 +22,10 @@ const markets = [
 ];
 
 const positiveKinds = new Set(["deposit", "refund"]);
-
-function money(minor = 0, currency = "NGN") {
-  return new Intl.NumberFormat("en-NG", { style: "currency", currency, minimumFractionDigits: 2 }).format(minor / 100);
-}
-
-function humanize(value: string) {
-  return value.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase());
+function money(minor = 0, currency = "NGN") { return new Intl.NumberFormat("en-NG", { style: "currency", currency, minimumFractionDigits: 2 }).format(minor / 100); }
+function humanize(value: string) { return value.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase()); }
+function incoming(kind: string, metadata: unknown) {
+  return kind === "transfer" && !!metadata && typeof metadata === "object" && !Array.isArray(metadata) && (metadata as Record<string, unknown>).direction === "incoming";
 }
 
 export default async function HomePage() {
@@ -40,7 +37,7 @@ export default async function HomePage() {
   const [profileResult, balanceResult, transactionResult, accountResult] = await Promise.all([
     supabase.from("profiles").select("full_name,kyc_status").eq("id", userId).single(),
     supabase.from("wallet_balances").select("balance_minor,currency").eq("user_id", userId).eq("currency", "NGN").maybeSingle(),
-    supabase.from("transactions").select("id,kind,status,amount_minor,currency,reference,created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(5),
+    supabase.from("transactions").select("id,kind,status,amount_minor,currency,reference,created_at,metadata").eq("user_id", userId).order("created_at", { ascending: false }).limit(5),
     supabase.from("virtual_accounts").select("bank_name,account_name,account_number").eq("user_id", userId).eq("active", true).limit(1).maybeSingle(),
   ]);
 
@@ -64,6 +61,6 @@ export default async function HomePage() {
       <section className="panel rounded-[30px] p-5 md:p-6"><div className="flex items-center justify-between"><div><h3 className="text-base font-bold">Crypto market</h3><p className="muted mt-1 text-xs">Quotes are finalized server-side</p></div><Link href="/crypto" className="flex items-center gap-1 text-xs font-semibold text-cyan-300">Trade <ChevronRight size={14}/></Link></div><div className="mt-4 divide-y divide-white/6">{markets.map(coin=><div key={coin.symbol} className="flex items-center justify-between py-3.5"><div className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/[.045] text-cyan-300"><CircleDollarSign size={19}/></div><div><p className="text-sm font-semibold">{coin.name}</p><p className="muted text-[11px]">{coin.symbol}</p></div></div><div className="text-right"><p className="text-xs font-semibold">{coin.price}</p><p className="mt-1 text-[11px] text-cyan-300">{coin.change}</p></div></div>)}</div></section>
     </div>
 
-    <section className="panel mt-5 rounded-[30px] p-5 md:p-6"><div className="flex items-center justify-between"><div><h3 className="text-base font-bold">Recent transactions</h3><p className="muted mt-1 text-xs">Live account activity</p></div><Link href="/transactions" className="text-xs font-semibold text-cyan-300">See all</Link></div><div className="mt-4 divide-y divide-white/6">{transactions.length === 0 ? <div className="py-10 text-center"><p className="text-sm font-semibold">No transactions yet</p><p className="muted mt-2 text-xs">Your first payment or wallet funding will appear here.</p></div> : transactions.map(tx=>{const positive=positiveKinds.has(tx.kind); return <div key={tx.id} className="flex items-center justify-between gap-4 py-4"><div className="flex min-w-0 items-center gap-3"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/[.04] text-slate-300"><ReceiptText size={19}/></div><div className="min-w-0"><p className="truncate text-sm font-semibold">{humanize(tx.kind)}</p><p className="muted mt-1 truncate text-[11px]">{tx.status} · {new Date(tx.created_at).toLocaleString("en-NG")} · {tx.reference}</p></div></div><p className={`shrink-0 text-xs font-bold sm:text-sm ${positive?"text-emerald-300":"text-slate-100"}`}>{positive?"+":"-"}{money(Number(tx.amount_minor),tx.currency)}</p></div>})}</div></section>
+    <section className="panel mt-5 rounded-[30px] p-5 md:p-6"><div className="flex items-center justify-between"><div><h3 className="text-base font-bold">Recent transactions</h3><p className="muted mt-1 text-xs">Live account activity</p></div><Link href="/transactions" className="text-xs font-semibold text-cyan-300">See all</Link></div><div className="mt-4 divide-y divide-white/6">{transactions.length === 0 ? <div className="py-10 text-center"><p className="text-sm font-semibold">No transactions yet</p><p className="muted mt-2 text-xs">Your first payment or wallet funding will appear here.</p></div> : transactions.map(tx=>{const positive=positiveKinds.has(tx.kind)||incoming(tx.kind,tx.metadata); const title=tx.kind==='transfer'?(positive?'Transfer received':'Transfer sent'):humanize(tx.kind); return <div key={tx.id} className="flex items-center justify-between gap-4 py-4"><div className="flex min-w-0 items-center gap-3"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/[.04] text-slate-300"><ReceiptText size={19}/></div><div className="min-w-0"><p className="truncate text-sm font-semibold">{title}</p><p className="muted mt-1 truncate text-[11px]">{tx.status} · {new Date(tx.created_at).toLocaleString("en-NG")} · {tx.reference}</p></div></div><p className={`shrink-0 text-xs font-bold sm:text-sm ${positive?"text-emerald-300":"text-slate-100"}`}>{positive?"+":"-"}{money(Number(tx.amount_minor),tx.currency)}</p></div>})}</div></section>
   </AppShell>;
 }
