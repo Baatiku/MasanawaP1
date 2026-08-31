@@ -1,0 +1,17 @@
+import Link from "next/link";
+import { ArrowLeft, ShieldCheck } from "lucide-react";
+
+const sections = [
+  ["Information we use", "Masanawa processes account details you provide, authentication identifiers, profile and verification information, transaction records, support messages, device/session security data and provider references needed to operate the service."],
+  ["Financial records", "Wallet and transaction records are retained as accounting and security records. Sensitive credentials such as your transaction PIN are not stored in readable form. Provider secrets and privileged database credentials are kept server-side."],
+  ["Identity verification", "When you submit identity documents, they are stored with restricted access and used for verification and account-risk review. Where an external provider requires identity validation, only the information needed for that request should be sent."],
+  ["Third-party providers", "Masanawa may send transaction-related information to payment, banking, VTU, verification or digital-asset providers when required to perform a service. Provider responses and references may be retained for reconciliation, support and fraud investigation."],
+  ["How we use data", "Data is used to authenticate users, process transactions, calculate balances, enforce limits, prevent abuse, resolve support cases, produce receipts, reconcile providers, send account notifications and improve service reliability."],
+  ["Access and security", "Customer-facing database access is restricted with row-level security. Privileged operations such as ledger settlement, administrative rewards and provider reconciliation are server-only. Access to administrative functions is role-controlled and audited."],
+  ["Your choices", "You can review and update supported profile information in the app, manage security settings and contact support about account data. Some financial, security or audit records may need to be retained even when other profile information can be changed."],
+  ["Updates", "This notice may change as Masanawa adds providers or features. The current version will be published on this page with an updated date."],
+] as const;
+
+export default function PrivacyPage() {
+  return <main className="min-h-screen px-5 py-8 md:px-8 lg:py-12"><div className="mx-auto max-w-3xl"><Link href="/register" className="muted inline-flex items-center gap-2 text-sm hover:text-white"><ArrowLeft size={17}/>Back</Link><div className="mt-8"><div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-300/10 text-cyan-300"><ShieldCheck size={21}/></div><h1 className="mt-5 text-3xl font-extrabold tracking-[-.04em]">Privacy Notice</h1><p className="muted mt-2 text-sm">How Masanawa handles application and transaction data · Last updated 31 August 2026</p></div><div className="panel mt-7 rounded-[30px] p-5 md:p-8"><p className="text-sm leading-7 text-slate-300">This notice explains the data handling built into the Masanawa application. It should be updated whenever the production provider or compliance configuration changes materially.</p><div className="mt-7 divide-y divide-white/7">{sections.map(([title,body])=><section key={title} className="py-6 first:pt-0 last:pb-0"><h2 className="text-base font-bold">{title}</h2><p className="muted mt-2 text-sm leading-7">{body}</p></section>)}</div></div></div></main>;
+}
