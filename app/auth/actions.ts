@@ -33,11 +33,6 @@ export async function register(formData: FormData) {
   if (!email || password.length < 8) redirect("/register?error=Use%20a%20valid%20email%20and%20at%20least%208%20characters%20for%20your%20password");
   if (referralCode && !/^[A-Z0-9]{6,24}$/.test(referralCode)) redirect(`/register?error=${encodeURIComponent("Referral code format is invalid.")}`);
   const supabase = await createClient();
-  if (referralCode) {
-    const { data: referral } = await supabase.from("referral_codes").select("code").eq("code", referralCode).maybeSingle();
-    // RLS intentionally prevents anonymous code enumeration. The database trigger validates attribution again after signup.
-    void referral;
-  }
   const { error } = await supabase.auth.signUp({
     email,
     password,
