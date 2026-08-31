@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, ReceiptText } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ReceiptText } from "lucide-react";
 import { createClient } from "../../lib/supabase/server";
 
 const positiveKinds = new Set(["deposit", "refund"]);
 function money(minor: number, currency: string) { return new Intl.NumberFormat("en-NG", { style: "currency", currency, minimumFractionDigits: 2 }).format(minor / 100); }
 function humanize(value: string) { return value.replaceAll("_", " ").replace(/\b\w/g, c => c.toUpperCase()); }
 
-export default async function TransactionsPage() {
+export default async function TransactionsPage({ searchParams }: { searchParams?: Promise<{ message?: string }> }) {
+  const params = (await searchParams) ?? {};
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
   const userId = claimsData?.claims?.sub;
@@ -24,6 +25,7 @@ export default async function TransactionsPage() {
     <main className="min-h-screen px-5 py-6 md:px-8 lg:px-12 lg:py-10">
       <div className="mx-auto max-w-6xl">
         <div className="flex items-center gap-4"><Link href="/" className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/8 bg-white/[.035]"><ArrowLeft size={18}/></Link><div><h1 className="text-2xl font-extrabold tracking-[-.035em]">Transactions</h1><p className="muted mt-1 text-xs">Live activity from your Masanawa ledger.</p></div></div>
+        {params.message && <div className="mt-6 flex items-start gap-3 rounded-2xl border border-emerald-300/20 bg-emerald-300/[.07] p-4 text-sm text-emerald-200"><CheckCircle2 size={18} className="mt-0.5 shrink-0"/><span>{params.message}</span></div>}
         <section className="panel mt-7 rounded-[30px] p-4 md:p-6">
           {error ? <div className="rounded-2xl border border-rose-400/20 bg-rose-400/8 p-4 text-sm text-rose-200">Unable to load transactions right now.</div> : null}
           <div className="divide-y divide-white/6">
