@@ -1,66 +1,37 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { ArrowDownToLine, ArrowUpFromLine, Bitcoin, ChevronRight, CircleDollarSign, Gift, Landmark, MoreHorizontal, Phone, ReceiptText, Send, Sparkles, Tv, Wifi, Zap } from "lucide-react";
-import AppShell from "./components/AppShell";
-import { createClient } from "../lib/supabase/server";
-import { formatLedgerAmount } from "../lib/ledger-format";
+import { ArrowRight, Banknote, Bitcoin, Gift, Landmark, LockKeyhole, Phone, ReceiptText, Send, ShieldCheck, Sparkles, Tv, WalletCards, Wifi, Zap } from "lucide-react";
+import { PublicPage } from "./components/PublicChrome";
+
+const products = [
+  { icon: Send, title: "Send and receive", text: "Move money between Masanawa accounts with PIN-protected transfers." },
+  { icon: Bitcoin, title: "Digital assets", text: "Buy, sell and swap supported assets only when verified provider execution is available." },
+  { icon: ReceiptText, title: "Everyday bills", text: "Pay for airtime, data, electricity, cable and supported digital services from one wallet." },
+  { icon: Gift, title: "Rewards", text: "Invite people with your referral code and track qualified rewards transparently." },
+];
 
 const services = [
-  { label: "Airtime", icon: Phone, href: "/services/airtime" },
-  { label: "Data", icon: Wifi, href: "/services/data" },
-  { label: "Electricity", icon: Zap, href: "/services/electricity" },
-  { label: "Cable TV", icon: Tv, href: "/services/cable" },
-  { label: "Crypto", icon: Bitcoin, href: "/crypto" },
-  { label: "Gift Cards", icon: Gift, href: "/services/gift-cards" },
-  { label: "Telegram", icon: Sparkles, href: "/services/telegram" },
-  { label: "More", icon: MoreHorizontal, href: "/services" },
-];
+  [Phone,"Airtime"],[Wifi,"Data"],[Zap,"Electricity"],[Tv,"Cable TV"],[Bitcoin,"Crypto"],[Gift,"Gift cards"],[Sparkles,"Telegram"],[Landmark,"Virtual account"],
+] as const;
 
-const markets = [
-  { name: "Bitcoin", symbol: "BTC", price: "Market quote", change: "BTC" },
-  { name: "Ethereum", symbol: "ETH", price: "Market quote", change: "ETH" },
-  { name: "Tether", symbol: "USDT", price: "Market quote", change: "USDT" },
-];
+export default function WelcomePage(){
+ return <PublicPage>
+  <section className="relative overflow-hidden border-b border-white/6">
+    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_72%_30%,rgba(34,195,238,.13),transparent_28%),radial-gradient(circle_at_25%_5%,rgba(37,99,235,.09),transparent_25%)]"/>
+    <div className="relative mx-auto grid min-h-[680px] max-w-7xl items-center gap-12 px-5 py-16 md:px-8 lg:grid-cols-[1.02fr_.98fr] lg:py-24">
+      <div className="max-w-2xl"><h1 className="text-4xl font-extrabold leading-[1.05] tracking-[-.055em] sm:text-5xl lg:text-6xl">One secure place for <span className="text-cyan-300">payments, crypto and everyday services.</span></h1><p className="mt-6 max-w-xl text-base leading-8 text-slate-400">Fund your wallet, transfer money, pay bills, access provider-backed digital assets and manage your account from one modern Masanawa experience.</p><div className="mt-8 flex flex-col gap-3 sm:flex-row"><Link href="/register" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-cyan-300 px-6 py-3.5 text-sm font-bold text-slate-950 transition hover:bg-cyan-200">Create free account <ArrowRight size={16}/></Link><Link href="/#products" className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/[.035] px-6 py-3.5 text-sm font-semibold text-slate-200 transition hover:bg-white/[.06]">Explore Masanawa</Link></div><div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-xs text-slate-400"><span className="inline-flex items-center gap-2"><ShieldCheck size={15} className="text-cyan-300"/>PIN-protected transactions</span><span className="inline-flex items-center gap-2"><LockKeyhole size={15} className="text-cyan-300"/>Private account controls</span><span className="inline-flex items-center gap-2"><WalletCards size={15} className="text-cyan-300"/>Ledger-backed balances</span></div></div>
+      <div className="relative mx-auto w-full max-w-xl"><div className="absolute inset-8 rounded-full bg-cyan-300/10 blur-3xl"/><div className="panel relative rounded-[34px] p-4 shadow-2xl md:p-6"><div className="flex items-center justify-between border-b border-white/7 pb-4"><div className="flex items-center gap-3"><img src="/masanawa-mark.svg" alt="" className="h-9 w-9"/><div><p className="text-sm font-bold">Masanawa wallet</p><p className="muted text-[11px]">Secure account overview</p></div></div><span className="rounded-xl border border-emerald-300/15 bg-emerald-300/[.06] px-2.5 py-1 text-[10px] font-semibold text-emerald-300">Protected</span></div><div className="mt-5 rounded-[28px] border border-white/8 bg-[#101f33] p-5"><p className="muted text-xs">NGN wallet</p><p className="mt-2 text-3xl font-extrabold tracking-[-.04em]">₦0.00</p><p className="muted mt-2 text-[11px]">Your balance appears here after you create and fund your account.</p><div className="mt-5 grid grid-cols-3 gap-2"><PreviewButton icon={Banknote} label="Fund"/><PreviewButton icon={Send} label="Transfer"/><PreviewButton icon={Landmark} label="Withdraw"/></div></div><div className="mt-4 grid grid-cols-2 gap-3"><div className="rounded-2xl border border-white/7 bg-white/[.025] p-4"><p className="muted text-[10px] uppercase tracking-[.12em]">Virtual account</p><p className="mt-2 text-sm font-semibold">Assigned after verification</p></div><div className="rounded-2xl border border-white/7 bg-white/[.025] p-4"><p className="muted text-[10px] uppercase tracking-[.12em]">Digital assets</p><p className="mt-2 text-sm font-semibold">BTC · ETH · USDT</p></div></div></div></div>
+    </div>
+  </section>
 
-const positiveKinds = new Set(["deposit", "refund"]);
-function humanize(value: string) { return value.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase()); }
-function incoming(kind: string, metadata: unknown) {
-  return kind === "transfer" && !!metadata && typeof metadata === "object" && !Array.isArray(metadata) && (metadata as Record<string, unknown>).direction === "incoming";
+  <section id="products" className="mx-auto max-w-7xl px-5 py-20 md:px-8 lg:py-28"><div className="max-w-2xl"><h2 className="text-3xl font-extrabold tracking-[-.04em] md:text-4xl">Everything important, without the clutter.</h2><p className="mt-4 text-sm leading-7 text-slate-400">Masanawa brings the most-used financial and digital-service actions into one account with clear transaction records and security checks at every sensitive step.</p></div><div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">{products.map(({icon:Icon,title,text})=><article key={title} className="rounded-[28px] border border-white/7 bg-white/[.025] p-5"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-300/9 text-cyan-300"><Icon size={20}/></div><h3 className="mt-5 text-base font-bold">{title}</h3><p className="muted mt-2 text-xs leading-6">{text}</p></article>)}</div></section>
+
+  <section className="border-y border-white/6 bg-[#081522]"><div className="mx-auto max-w-7xl px-5 py-20 md:px-8"><div className="grid gap-12 lg:grid-cols-[.8fr_1.2fr] lg:items-center"><div><h2 className="text-3xl font-extrabold tracking-[-.04em]">Daily services from the same wallet.</h2><p className="muted mt-4 text-sm leading-7">No separate balance for every biller. Choose a supported service, confirm the recipient and amount, authorize with your transaction PIN and track the result in your transaction history.</p><Link href="/register" className="mt-7 inline-flex items-center gap-2 text-sm font-bold text-cyan-300">Open an account <ArrowRight size={15}/></Link></div><div className="grid grid-cols-2 gap-3 sm:grid-cols-4">{services.map(([Icon,label])=><div key={label} className="rounded-2xl border border-white/7 bg-white/[.025] p-4"><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-300/8 text-cyan-300"><Icon size={18}/></div><p className="mt-3 text-xs font-semibold">{label}</p></div>)}</div></div></div></section>
+
+  <section className="mx-auto max-w-7xl px-5 py-20 md:px-8 lg:py-28"><div className="grid gap-5 lg:grid-cols-3"><div className="lg:col-span-1"><h2 className="text-3xl font-extrabold tracking-[-.04em]">Security is part of the flow.</h2><p className="muted mt-4 text-sm leading-7">Masanawa uses identity checks, transaction PINs, provider verification, immutable ledger records and account controls to reduce unsafe financial actions.</p><Link href="/security" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-cyan-300">See security controls <ArrowRight size={15}/></Link></div><div className="grid gap-4 sm:grid-cols-2 lg:col-span-2"><SecurityItem title="Transaction PIN" text="Sensitive wallet actions require a six-digit PIN stored as a one-way hash."/><SecurityItem title="Provider verification" text="Funding and payout states are settled only after verified provider responses or signed webhooks."/><SecurityItem title="KYC-linked limits" text="Per-transaction and rolling 24-hour limits are enforced in the database, not just the interface."/><SecurityItem title="Financial audit trail" text="Ledger entries, transactions, provider attempts and operational actions remain traceable."/></div></div></section>
+
+  <section className="px-5 pb-20 md:px-8 lg:pb-28"><div className="mx-auto max-w-7xl overflow-hidden rounded-[34px] border border-cyan-300/15 bg-[linear-gradient(135deg,rgba(34,195,238,.12),rgba(14,165,233,.025))] px-6 py-12 text-center md:px-10 md:py-16"><h2 className="text-3xl font-extrabold tracking-[-.04em] md:text-4xl">Ready to use Masanawa?</h2><p className="muted mx-auto mt-4 max-w-xl text-sm leading-7">Create your account, secure it with a transaction PIN, complete verification when needed and start from one clear dashboard.</p><div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row"><Link href="/register" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-cyan-300 px-6 py-3.5 text-sm font-bold text-slate-950">Create account <ArrowRight size={16}/></Link><Link href="/login" className="rounded-2xl border border-white/10 bg-white/[.035] px-6 py-3.5 text-sm font-semibold">Sign in</Link></div></div></section>
+ </PublicPage>;
 }
 
-export default async function HomePage() {
-  const supabase = await createClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
-  const userId = claimsData?.claims?.sub;
-  if (!userId) redirect("/login");
-
-  const [profileResult, balanceResult, transactionResult, accountResult] = await Promise.all([
-    supabase.from("profiles").select("full_name,kyc_status").eq("id", userId).single(),
-    supabase.from("wallet_balances").select("balance_minor,currency").eq("user_id", userId).eq("currency", "NGN").maybeSingle(),
-    supabase.from("transactions").select("id,kind,status,amount_minor,currency,reference,created_at,metadata").eq("user_id", userId).order("created_at", { ascending: false }).limit(5),
-    supabase.from("virtual_accounts").select("bank_name,account_name,account_number").eq("user_id", userId).eq("active", true).limit(1).maybeSingle(),
-  ]);
-
-  const profile = profileResult.data;
-  const wallet = balanceResult.data;
-  const transactions = transactionResult.data ?? [];
-  const virtualAccount = accountResult.data;
-  const firstName = profile?.full_name?.trim().split(/\s+/)[0] || "there";
-  const fullName = profile?.full_name || "Masanawa customer";
-
-  return <AppShell active="Home" title="Dashboard" subtitle="Your money, services and digital assets in one place.">
-    <div className="mb-6 lg:mb-8"><p className="muted text-sm">Welcome 👋</p><h1 className="mt-1 text-2xl font-bold tracking-tight md:text-3xl">Welcome back, {firstName}</h1></div>
-
-    <div className="grid gap-5 xl:grid-cols-[1.35fr_.65fr]">
-      <section className="panel relative overflow-hidden rounded-[30px] p-6 md:p-8"><div className="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-cyan-300/10 blur-3xl"/><div className="relative"><div className="flex items-start justify-between gap-5"><div><p className="muted text-sm">Available balance</p><h2 className="mt-2 text-3xl font-extrabold tracking-[-.04em] sm:text-4xl md:text-5xl">{formatLedgerAmount(Number(wallet?.balance_minor ?? 0), wallet?.currency ?? "NGN")}</h2><p className="mt-2 text-xs text-slate-400">Ledger-backed balance</p></div><span className="rounded-xl border border-white/8 bg-white/[.04] px-3 py-2 text-xs text-slate-300">{wallet?.currency ?? "NGN"}</span></div><div className="mt-8 grid grid-cols-3 gap-3 md:max-w-lg"><Link href="/wallet/fund" className="flex items-center justify-center gap-2 rounded-2xl bg-cyan-300 px-3 py-3 text-xs font-bold text-slate-950"><ArrowDownToLine size={16}/>Fund</Link><Link href="/wallet/transfer" className="flex items-center justify-center gap-2 rounded-2xl border border-white/8 bg-white/[.04] px-3 py-3 text-xs font-semibold"><Send size={16}/>Transfer</Link><Link href="/wallet/withdraw" className="flex items-center justify-center gap-2 rounded-2xl border border-white/8 bg-white/[.04] px-3 py-3 text-xs font-semibold"><ArrowUpFromLine size={16}/>Withdraw</Link></div></div></section>
-      <section className="panel rounded-[30px] p-5 md:p-6"><div className="flex items-center justify-between"><div><p className="text-sm font-semibold">Virtual account</p><p className="muted mt-1 text-xs">Instant bank transfers</p></div><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-300/10 text-cyan-300"><Landmark size={21}/></div></div><div className="soft-panel mt-5 rounded-2xl p-4"><p className="muted text-[11px] uppercase tracking-[.12em]">Account number</p><p className="mt-1 text-xl font-bold tracking-wider">{virtualAccount?.account_number ?? "Not assigned yet"}</p><div className="mt-4 flex items-center justify-between border-t border-white/7 pt-3"><div><p className="text-xs font-semibold">{virtualAccount?.account_name ?? fullName}</p><p className="muted mt-1 text-[11px]">{virtualAccount?.bank_name ?? "Fund wallet to activate your payment account"}</p></div><Link href="/wallet/fund" className="text-xs font-semibold text-cyan-300">Fund</Link></div></div></section>
-    </div>
-
-    <div className="mt-5 grid gap-5 xl:grid-cols-[1fr_.72fr]">
-      <section className="panel rounded-[30px] p-5 md:p-6"><div className="flex items-center justify-between"><div><h3 className="text-base font-bold">Quick services</h3><p className="muted mt-1 text-xs">What would you like to do?</p></div><Link href="/services" className="text-xs font-semibold text-cyan-300">View all</Link></div><div className="mt-5 grid grid-cols-4 gap-3 sm:grid-cols-4 lg:grid-cols-8 xl:grid-cols-4 2xl:grid-cols-8">{services.map(({label,icon:Icon,href})=><Link href={href} key={label} className="group flex min-h-[100px] flex-col items-center justify-center rounded-2xl border border-white/7 bg-white/[.028] px-2 transition hover:-translate-y-0.5 hover:border-cyan-300/20 hover:bg-cyan-300/[.055]"><span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-cyan-300/9 text-cyan-300"><Icon size={19}/></span><span className="mt-2 text-[11px] font-medium text-slate-300">{label}</span></Link>)}</div></section>
-      <section className="panel rounded-[30px] p-5 md:p-6"><div className="flex items-center justify-between"><div><h3 className="text-base font-bold">Crypto market</h3><p className="muted mt-1 text-xs">Quotes are finalized server-side</p></div><Link href="/crypto" className="flex items-center gap-1 text-xs font-semibold text-cyan-300">Trade <ChevronRight size={14}/></Link></div><div className="mt-4 divide-y divide-white/6">{markets.map(coin=><div key={coin.symbol} className="flex items-center justify-between py-3.5"><div className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/[.045] text-cyan-300"><CircleDollarSign size={19}/></div><div><p className="text-sm font-semibold">{coin.name}</p><p className="muted text-[11px]">{coin.symbol}</p></div></div><div className="text-right"><p className="text-xs font-semibold">{coin.price}</p><p className="mt-1 text-[11px] text-cyan-300">{coin.change}</p></div></div>)}</div></section>
-    </div>
-
-    <section className="panel mt-5 rounded-[30px] p-5 md:p-6"><div className="flex items-center justify-between"><div><h3 className="text-base font-bold">Recent transactions</h3><p className="muted mt-1 text-xs">Live account activity</p></div><Link href="/transactions" className="text-xs font-semibold text-cyan-300">See all</Link></div><div className="mt-4 divide-y divide-white/6">{transactions.length === 0 ? <div className="py-10 text-center"><p className="text-sm font-semibold">No transactions yet</p><p className="muted mt-2 text-xs">Your first payment or wallet funding will appear here.</p></div> : transactions.map(tx=>{const positive=positiveKinds.has(tx.kind)||incoming(tx.kind,tx.metadata); const title=tx.kind==='transfer'?(positive?'Transfer received':'Transfer sent'):humanize(tx.kind); return <div key={tx.id} className="flex items-center justify-between gap-4 py-4"><div className="flex min-w-0 items-center gap-3"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/[.04] text-slate-300"><ReceiptText size={19}/></div><div className="min-w-0"><p className="truncate text-sm font-semibold">{title}</p><p className="muted mt-1 truncate text-[11px]">{tx.status} · {new Date(tx.created_at).toLocaleString("en-NG")} · {tx.reference}</p></div></div><p className={`shrink-0 text-xs font-bold sm:text-sm ${positive?"text-emerald-300":"text-slate-100"}`}>{positive?"+":"-"}{formatLedgerAmount(Number(tx.amount_minor),tx.currency)}</p></div>})}</div></section>
-  </AppShell>;
-}
+function PreviewButton({icon:Icon,label}:{icon:typeof Banknote;label:string}){return <div className="flex items-center justify-center gap-1.5 rounded-xl border border-white/8 bg-white/[.04] px-2 py-2.5 text-[11px] font-semibold"><Icon size={14} className="text-cyan-300"/>{label}</div>}
+function SecurityItem({title,text}:{title:string;text:string}){return <div className="rounded-[26px] border border-white/7 bg-white/[.025] p-5"><ShieldCheck className="text-cyan-300" size={20}/><h3 className="mt-4 text-sm font-bold">{title}</h3><p className="muted mt-2 text-xs leading-6">{text}</p></div>}
