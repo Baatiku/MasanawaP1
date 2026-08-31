@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "../../../lib/supabase/server";
+import { ledgerAmountForCsv } from "../../../lib/ledger-format";
 
 const allowedStatuses = new Set(["pending","processing","successful","failed","reversed","cancelled"]);
 const allowedKinds = new Set(["deposit","withdrawal","transfer","airtime","data","electricity","cable","gift_card","telegram","crypto_buy","crypto_sell","crypto_swap","refund","adjustment"]);
@@ -38,8 +39,8 @@ export async function GET(request: Request) {
       row.reference,
       row.kind,
       row.status,
-      (Number(row.amount_minor) / 100).toFixed(2),
-      (Number(row.fee_minor) / 100).toFixed(2),
+      ledgerAmountForCsv(Number(row.amount_minor), row.currency),
+      ledgerAmountForCsv(Number(row.fee_minor), row.currency),
       row.currency,
       row.created_at,
     ].map(csvCell).join(",")),
