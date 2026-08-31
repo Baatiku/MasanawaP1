@@ -1,11 +1,43 @@
-<div align="center">
+# Masanawa
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+Masanawa is a responsive fintech web application for wallet funding, transfers, digital services, bill payments, and digital-asset experiences.
 
-  <h1>Built with AI Studio</h2>
+## Current milestone
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+- Responsive dashboard shell
+- Desktop sidebar and mobile bottom navigation
+- Wallet balance and virtual account cards
+- Quick services grid
+- Crypto market panel
+- Recent transactions
+- Login experience
+- Registration experience
+- Shared dark fintech design system
+- GitHub Actions production-build validation
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+## Stack
 
-</div>
+- Next.js 15 App Router
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- Lucide icons
+
+## Local development
+
+```bash
+npm install
+npm run dev
+```
+
+Open `http://localhost:3000`.
+
+## Routes
+
+- `/` — dashboard
+- `/login` — sign in
+- `/register` — account creation
+
+## Architecture direction
+
+The browser is treated as an untrusted client. Authentication, provider credentials, balances, transaction authorization, ledger operations, payment callbacks, and future crypto/provider secrets belong behind server-side APIs. Financial balances will ultimately be backed by an auditable ledger rather than client-side state.
