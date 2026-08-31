@@ -77,3 +77,15 @@ export async function upsertProviderRoute(formData: FormData) {
   revalidatePath("/admin");
   redirect(`/admin?message=${encodeURIComponent(`${providerCode} route for ${productCode} updated.`)}`);
 }
+
+export async function deleteProviderRoute(formData: FormData) {
+  const routeId = String(formData.get("route_id") ?? "").trim();
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(routeId)) {
+    redirect(`/admin?error=${encodeURIComponent("Invalid provider route.")}`);
+  }
+  const supabase = await requireAdmin();
+  const { error } = await supabase.rpc("admin_delete_provider_product_route", { p_route_id: routeId });
+  if (error) redirect(`/admin?error=${encodeURIComponent(error.message)}`);
+  revalidatePath("/admin");
+  redirect(`/admin?message=${encodeURIComponent("Provider route removed.")}`);
+}
