@@ -27,6 +27,7 @@ export async function createFundingIntent(formData: FormData) {
   if (error) redirect(`/wallet/fund?error=${encodeURIComponent(error.message)}`);
   const result = Array.isArray(data) ? data[0] : data;
   const reference = result?.reference ? String(result.reference) : "";
+  let checkoutUrl: string | undefined;
 
   if (reference && userData.user?.email && isPaystackConfigured() && process.env.SUPABASE_SECRET_KEY) {
     try {
@@ -35,12 +36,13 @@ export async function createFundingIntent(formData: FormData) {
         amountMinor,
         reference,
       });
-      if (paystack.authorization_url) redirect(paystack.authorization_url);
+      checkoutUrl = paystack.authorization_url;
     } catch (providerError) {
       const message = providerError instanceof Error ? providerError.message : "Unable to initialize payment provider";
       redirect(`/wallet/fund?error=${encodeURIComponent(message)}`);
     }
   }
 
+  if (checkoutUrl) redirect(checkoutUrl);
   redirect(`/wallet/fund?message=${encodeURIComponent(`Funding request ${reference || "created"} is pending. Online checkout activates when Paystack and the Supabase server secret are configured.`)}`);
 }
