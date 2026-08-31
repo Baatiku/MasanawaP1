@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { createClient } from "../../lib/supabase/server";
+import { initializePaystackTransaction, isPaystackConfigured } from "../../lib/providers/paystack";
 
 export async function createFundingIntent(formData: FormData) {
   const amountNgn = Number(String(formData.get("amount") ?? "0").replace(/,/g, ""));
@@ -10,17 +11,36 @@ export async function createFundingIntent(formData: FormData) {
     redirect(`/wallet/fund?error=${encodeURIComponent("Enter a funding amount of at least ₦100.")}`);
   }
 
+  const amountMinor = Math.round(amountNgn * 100);
   const supabase = await createClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
+  const [{ data: claimsData }, { data: userData }] = await Promise.all([
+    supabase.auth.getClaims(),
+    supabase.auth.getUser(),
+  ]);
   if (!claimsData?.claims?.sub) redirect("/login");
 
   const { data, error } = await supabase.rpc("create_funding_intent", {
-    p_amount_minor: Math.round(amountNgn * 100),
+    p_amount_minor: amountMinor,
     p_idempotency_key: randomUUID(),
   });
 
   if (error) redirect(`/wallet/fund?error=${encodeURIComponent(error.message)}`);
   const result = Array.isArray(data) ? data[0] : data;
-  const reference = result?.reference ? String(result.reference) : "created";
-  redirect(`/wallet/fund?message=${encodeURIComponent(`Funding request ${reference} created. Await payment instructions or virtual-account provisioning.`)}`);
+  const reference = result?.reference ? String(result.reference) : "";
+
+  if (reference && userData.user?.email && isPaystackConfigured() && process.env.SUPABASE_SECRET_KEY) {
+    try {
+      const paystack = await initializePaystackTransaction({
+        email: userData.user.email,
+        amountMinor,
+        reference,
+      });
+      if (paystack.authorization_url) redirect(paystack.authorization_url);
+    } catch (providerError) {
+      const message = providerError instanceof Error ? providerError.message : "Unable to initialize payment provider";
+      redirect(`/wallet/fund?error=${encodeURIComponent(message)}`);
+    }
+  }
+
+  redirect(`/wallet/fund?message=${encodeURIComponent(`Funding request ${reference || "created"} is pending. Online checkout activates when Paystack and the Supabase server secret are configured.`)}`);
 }
