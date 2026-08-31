@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Manrope } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], display: "swap" });
+const manrope = Manrope({ subsets: ["latin"], display: "swap" });
 const deployedHost = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || (deployedHost ? `https://${deployedHost}` : "http://localhost:3000");
 
@@ -18,5 +18,5 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-export const viewport: Viewport = { themeColor: "#07111f", colorScheme: "dark", width: "device-width", initialScale: 1 };
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) { return <html lang="en"><body className={inter.className}>{children}</body></html>; }
+export const viewport: Viewport = { themeColor: "#030b19", colorScheme: "dark", width: "device-width", initialScale: 1 };
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) { return <html lang="en"><body className={manrope.className}>{children}</body></html>; }
