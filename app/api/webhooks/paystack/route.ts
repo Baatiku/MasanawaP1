@@ -33,7 +33,7 @@ export async function POST(request: Request) {
   }
 
   const reference = String(event.data?.reference ?? "");
-  const eventId = `${event.event ?? "unknown"}:${String(event.data?.id ?? reference || "unknown")}`;
+  const eventId = `${event.event ?? "unknown"}:${String(event.data?.id ?? (reference || "unknown"))}`;
   const admin = createAdminClient();
 
   const { error: eventInsertError } = await admin.from("webhook_events").insert({
