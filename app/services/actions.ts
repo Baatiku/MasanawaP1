@@ -32,6 +32,7 @@ export async function prepareServiceOrder(formData: FormData) {
     productCode,
     amountMinor,
     returnTo,
+    idempotencyKey: randomUUID(),
   });
   const cookieStore = await cookies();
   cookieStore.set(SERVICE_REVIEW_COOKIE, token, {
@@ -64,7 +65,7 @@ export async function confirmServiceOrder(formData: FormData) {
     p_amount_minor: review.amountMinor,
     p_recipient: review.recipient,
     p_product_code: review.productCode,
-    p_idempotency_key: randomUUID(),
+    p_idempotency_key: review.idempotencyKey,
     p_pin: pin,
   });
 

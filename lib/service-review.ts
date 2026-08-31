@@ -11,6 +11,7 @@ export type ServiceReview = {
   productCode: string;
   amountMinor: number;
   returnTo: string;
+  idempotencyKey: string;
   expiresAt: number;
 };
 
@@ -43,6 +44,7 @@ export function readServiceReviewToken(token: string | undefined): ServiceReview
   try {
     const value = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as Partial<ServiceReview>;
     if (!value.kind || !value.recipient || !value.productCode || !value.returnTo) return null;
+    if (!value.idempotencyKey || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value.idempotencyKey)) return null;
     if (!Number.isSafeInteger(value.amountMinor) || Number(value.amountMinor) < 0) return null;
     if (!Number.isSafeInteger(value.expiresAt) || Number(value.expiresAt) <= Date.now()) return null;
     return value as ServiceReview;

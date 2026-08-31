@@ -1,8 +1,8 @@
 'use server';
 
-import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { readIdempotencyKey } from "../../lib/idempotency";
 import { createClient } from "../../lib/supabase/server";
 import { createAdminClient } from "../../lib/supabase/admin";
 import {
@@ -21,12 +21,14 @@ function ngn(formData: FormData, key = "amount") {
 
 export async function createFundingIntent(formData: FormData) {
   const amountNgn = ngn(formData);
-  if (!Number.isFinite(amountNgn) || amountNgn < 100) redirect(`/wallet/fund?error=${encodeURIComponent("Enter a funding amount of at least ₦100.")}`);
   const amountMinor = Math.round(amountNgn * 100);
+  const idempotencyKey = readIdempotencyKey(formData);
+  if (!Number.isFinite(amountNgn) || amountNgn < 100 || !Number.isSafeInteger(amountMinor)) redirect(`/wallet/fund?error=${encodeURIComponent("Enter a funding amount of at least ₦100.")}`);
+  if (!idempotencyKey) redirect(`/wallet/fund?error=${encodeURIComponent("This funding request expired. Please submit it again.")}`);
   const supabase = await createClient();
   const [{ data: claimsData }, { data: userData }] = await Promise.all([supabase.auth.getClaims(), supabase.auth.getUser()]);
   if (!claimsData?.claims?.sub) redirect("/login");
-  const { data, error } = await supabase.rpc("create_funding_intent", { p_amount_minor: amountMinor, p_idempotency_key: randomUUID() });
+  const { data, error } = await supabase.rpc("create_funding_intent", { p_amount_minor: amountMinor, p_idempotency_key: idempotencyKey });
   if (error) redirect(`/wallet/fund?error=${encodeURIComponent(error.message)}`);
   const row = Array.isArray(data) ? data[0] : data;
   const reference = row?.reference ? String(row.reference) : "";
@@ -103,11 +105,14 @@ export async function transferToUsername(formData: FormData) {
   const username = String(formData.get("username") ?? "").trim();
   const amountNgn = ngn(formData);
   const pin = String(formData.get("pin") ?? "").trim();
-  if (!username || !Number.isFinite(amountNgn) || amountNgn < 1 || !/^\d{6}$/.test(pin)) redirect(`/wallet/transfer?error=${encodeURIComponent("Enter a valid username, amount and six-digit PIN.")}`);
+  const amountMinor = Math.round(amountNgn * 100);
+  const idempotencyKey = readIdempotencyKey(formData);
+  if (!username || !Number.isFinite(amountNgn) || amountNgn < 1 || !Number.isSafeInteger(amountMinor) || !/^\d{6}$/.test(pin)) redirect(`/wallet/transfer?error=${encodeURIComponent("Enter a valid username, amount and six-digit PIN.")}`);
+  if (!idempotencyKey) redirect(`/wallet/transfer?error=${encodeURIComponent("This transfer request expired. Please submit it again.")}`);
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
   if (!claimsData?.claims?.sub) redirect("/login");
-  const { data, error } = await supabase.rpc("transfer_to_username", { p_recipient_username: username, p_amount_minor: Math.round(amountNgn * 100), p_idempotency_key: randomUUID(), p_pin: pin });
+  const { data, error } = await supabase.rpc("transfer_to_username", { p_recipient_username: username, p_amount_minor: amountMinor, p_idempotency_key: idempotencyKey, p_pin: pin });
   if (error) redirect(`/wallet/transfer?error=${encodeURIComponent(error.message)}`);
   const row = Array.isArray(data) ? data[0] : data;
   const reference = row?.reference ? String(row.reference) : "completed";
@@ -116,12 +121,15 @@ export async function transferToUsername(formData: FormData) {
 
 export async function createBankWithdrawal(formData: FormData) {
   const amountNgn = ngn(formData);
+  const amountMinor = Math.round(amountNgn * 100);
   const bankCode = String(formData.get("bank_code") ?? "").trim();
   const accountNumber = String(formData.get("account_number") ?? "").trim();
   const pin = String(formData.get("pin") ?? "").trim();
+  const idempotencyKey = readIdempotencyKey(formData);
   const saveBeneficiary = formData.get("save_beneficiary") === "on";
   if (!isPaystackConfigured() || !process.env.SUPABASE_SECRET_KEY) redirect(`/wallet/withdraw?error=${encodeURIComponent("Bank withdrawals are temporarily unavailable because the payout provider is not configured.")}`);
-  if (!Number.isFinite(amountNgn) || amountNgn < 100 || !bankCode || !/^\d{10}$/.test(accountNumber) || !/^\d{6}$/.test(pin)) redirect(`/wallet/withdraw?error=${encodeURIComponent("Enter a valid bank, 10-digit account number, amount of at least ₦100 and six-digit PIN.")}`);
+  if (!Number.isFinite(amountNgn) || amountNgn < 100 || !Number.isSafeInteger(amountMinor) || !bankCode || !/^\d{10}$/.test(accountNumber) || !/^\d{6}$/.test(pin)) redirect(`/wallet/withdraw?error=${encodeURIComponent("Enter a valid bank, 10-digit account number, amount of at least ₦100 and six-digit PIN.")}`);
+  if (!idempotencyKey) redirect(`/wallet/withdraw?error=${encodeURIComponent("This withdrawal request expired. Please submit it again.")}`);
 
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
@@ -138,14 +146,13 @@ export async function createBankWithdrawal(formData: FormData) {
     redirect(`/wallet/withdraw?error=${encodeURIComponent(error instanceof Error ? error.message : "Unable to verify bank account")}`);
   }
 
-  const amountMinor = Math.round(amountNgn * 100);
   const { data, error } = await supabase.rpc("create_withdrawal_request", {
     p_amount_minor: amountMinor,
     p_bank_code: bankCode,
     p_bank_name: bankName,
     p_account_number: accountNumber,
     p_account_name: accountName,
-    p_idempotency_key: randomUUID(),
+    p_idempotency_key: idempotencyKey,
     p_pin: pin,
     p_save_beneficiary: saveBeneficiary,
   });

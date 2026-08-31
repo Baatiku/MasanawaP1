@@ -1,7 +1,7 @@
 'use server';
 
-import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
+import { readIdempotencyKey } from "../../lib/idempotency";
 import { createClient } from "../../lib/supabase/server";
 
 const assetDecimals: Record<string, number> = { BTC: 8, ETH: 8, USDT: 6 };
@@ -31,14 +31,17 @@ export async function createCryptoBuyOrder(formData: FormData) {
   const asset = String(formData.get("asset") ?? "").trim().toUpperCase();
   const amountNgn = Number(String(formData.get("amount") ?? "0").replace(/,/g, ""));
   const pin = String(formData.get("pin") ?? "").trim();
-  if (!supportedAssets.has(asset) || !Number.isFinite(amountNgn) || amountNgn < 100) redirect(`/crypto/buy?error=${encodeURIComponent("Choose BTC, ETH or USDT and enter at least ₦100.")}`);
+  const amountMinor = Math.round(amountNgn * 100);
+  const idempotencyKey = readIdempotencyKey(formData);
+  if (!supportedAssets.has(asset) || !Number.isFinite(amountNgn) || amountNgn < 100 || !Number.isSafeInteger(amountMinor)) redirect(`/crypto/buy?error=${encodeURIComponent("Choose BTC, ETH or USDT and enter at least ₦100.")}`);
   if (!/^\d{6}$/.test(pin)) redirect(`/crypto/buy?error=${encodeURIComponent("Enter your 6-digit transaction PIN.")}`);
+  if (!idempotencyKey) redirect(`/crypto/buy?error=${encodeURIComponent("This crypto order expired. Please submit it again.")}`);
 
   const supabase = await requireUser();
   const { data, error } = await supabase.rpc("create_pending_crypto_buy", {
     p_asset: asset,
-    p_amount_ngn_minor: Math.round(amountNgn * 100),
-    p_idempotency_key: randomUUID(),
+    p_amount_ngn_minor: amountMinor,
+    p_idempotency_key: idempotencyKey,
     p_pin: pin,
   });
   if (error) redirect(`/crypto/buy?error=${encodeURIComponent(error.message)}`);
@@ -53,14 +56,16 @@ export async function createCryptoSellOrder(formData: FormData) {
   const amount = String(formData.get("amount") ?? "");
   const pin = String(formData.get("pin") ?? "").trim();
   const amountMinor = parseAssetMinor(amount, asset);
+  const idempotencyKey = readIdempotencyKey(formData);
   if (!supportedAssets.has(asset) || amountMinor == null) redirect(`/crypto/sell?error=${encodeURIComponent("Choose a supported asset and enter a valid amount.")}`);
   if (!/^\d{6}$/.test(pin)) redirect(`/crypto/sell?error=${encodeURIComponent("Enter your 6-digit transaction PIN.")}`);
+  if (!idempotencyKey) redirect(`/crypto/sell?error=${encodeURIComponent("This crypto order expired. Please submit it again.")}`);
 
   const supabase = await requireUser();
   const { data, error } = await supabase.rpc("create_pending_crypto_sell", {
     p_asset: asset,
     p_amount_asset_minor: amountMinor,
-    p_idempotency_key: randomUUID(),
+    p_idempotency_key: idempotencyKey,
     p_pin: pin,
   });
   if (error) redirect(`/crypto/sell?error=${encodeURIComponent(error.message)}`);
@@ -76,15 +81,17 @@ export async function createCryptoSwapOrder(formData: FormData) {
   const amount = String(formData.get("amount") ?? "");
   const pin = String(formData.get("pin") ?? "").trim();
   const amountMinor = parseAssetMinor(amount, assetFrom);
+  const idempotencyKey = readIdempotencyKey(formData);
   if (!supportedAssets.has(assetFrom) || !supportedAssets.has(assetTo) || assetFrom === assetTo || amountMinor == null) redirect(`/crypto/swap?error=${encodeURIComponent("Choose two different supported assets and enter a valid amount.")}`);
   if (!/^\d{6}$/.test(pin)) redirect(`/crypto/swap?error=${encodeURIComponent("Enter your 6-digit transaction PIN.")}`);
+  if (!idempotencyKey) redirect(`/crypto/swap?error=${encodeURIComponent("This crypto order expired. Please submit it again.")}`);
 
   const supabase = await requireUser();
   const { data, error } = await supabase.rpc("create_pending_crypto_swap", {
     p_asset_from: assetFrom,
     p_asset_to: assetTo,
     p_amount_from_minor: amountMinor,
-    p_idempotency_key: randomUUID(),
+    p_idempotency_key: idempotencyKey,
     p_pin: pin,
   });
   if (error) redirect(`/crypto/swap?error=${encodeURIComponent(error.message)}`);
