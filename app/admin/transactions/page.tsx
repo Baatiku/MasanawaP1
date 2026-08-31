@@ -1,0 +1,28 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { ArrowLeft, Activity, ChevronRight, Search } from "lucide-react";
+import { createClient } from "../../../lib/supabase/server";
+import { createAdminClient } from "../../../lib/supabase/admin";
+
+function money(minor:number,currency='NGN'){return new Intl.NumberFormat('en-NG',{style:'currency',currency,minimumFractionDigits:2}).format(minor/100)}
+function titleCase(value:string){return value.replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase())}
+
+type Params={status?:string;kind?:string;q?:string};
+export default async function AdminTransactionsPage({searchParams}:{searchParams?:Promise<Params>}){
+ const params=(await searchParams)??{};
+ const q=(params.q??'').trim().slice(0,80);
+ const status=(params.status??'').trim(); const kind=(params.kind??'').trim();
+ const supabase=await createClient(); const {data:claimsData}=await supabase.auth.getClaims(); if(!claimsData?.claims?.sub) redirect('/login'); const {data:admin}=await supabase.rpc('is_admin'); if(!admin) redirect('/');
+ const service=createAdminClient();
+ let txQuery=service.from('transactions').select('id,user_id,kind,status,amount_minor,fee_minor,currency,reference,created_at,updated_at').order('created_at',{ascending:false}).limit(300);
+ if(status) txQuery=txQuery.eq('status',status); if(kind) txQuery=txQuery.eq('kind',kind); if(q) txQuery=txQuery.ilike('reference',`%${q.replaceAll('%','')}%`);
+ const {data:rows}=await txQuery; const ids=(rows??[]).map(r=>r.id); const userIds=[...new Set((rows??[]).map(r=>r.user_id))];
+ const [{data:profiles},{data:attempts}]=await Promise.all([
+   userIds.length?service.from('profiles').select('id,full_name,username,phone').in('id',userIds):Promise.resolve({data:[] as Array<{id:string;full_name:string|null;username:string|null;phone:string|null}>}),
+   ids.length?service.from('provider_attempts').select('transaction_id,status,error_code,error_message,provider_reference,created_at').in('transaction_id',ids).order('created_at',{ascending:false}):Promise.resolve({data:[] as Array<{transaction_id:string;status:string;error_code:string|null;error_message:string|null;provider_reference:string|null;created_at:string}>}),
+ ]);
+ const profileById=new Map((profiles??[]).map(p=>[p.id,p])); const attemptByTx=new Map<string,(typeof attempts extends Array<infer T>|null?T:never)>(); for(const a of attempts??[]){if(!attemptByTx.has(a.transaction_id)) attemptByTx.set(a.transaction_id,a)}
+ return <main className="min-h-screen px-5 py-6 md:px-8 lg:px-12 lg:py-10"><div className="mx-auto max-w-7xl"><div className="flex items-center gap-4"><Link href="/admin" className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/8 bg-white/[.035]"><ArrowLeft size={18}/></Link><div><div className="flex items-center gap-2"><Activity size={18} className="text-cyan-300"/><h1 className="text-2xl font-extrabold tracking-[-.035em]">Transactions</h1></div><p className="muted mt-1 text-xs">Monitor pending, failed and provider-backed financial activity.</p></div></div>
+ <form className="panel mt-6 grid gap-3 rounded-[24px] p-4 md:grid-cols-[1fr_.7fr_.8fr_auto]"><div className="relative"><Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"/><input name="q" defaultValue={q} placeholder="Reference" className="w-full rounded-2xl border border-white/8 bg-white/[.035] py-3 pl-9 pr-3 text-xs outline-none"/></div><select name="status" defaultValue={status} className="rounded-2xl border border-white/8 bg-[#101a2b] px-3 text-xs"><option value="">All statuses</option>{['pending','processing','successful','failed','reversed','cancelled'].map(v=><option key={v} value={v}>{titleCase(v)}</option>)}</select><select name="kind" defaultValue={kind} className="rounded-2xl border border-white/8 bg-[#101a2b] px-3 text-xs"><option value="">All types</option>{['deposit','withdrawal','transfer','airtime','data','electricity','cable','gift_card','telegram','crypto_buy','crypto_sell','crypto_swap','refund','adjustment'].map(v=><option key={v} value={v}>{titleCase(v)}</option>)}</select><button className="rounded-2xl bg-cyan-300 px-5 text-xs font-bold text-slate-950">Filter</button></form>
+ <section className="panel mt-5 rounded-[30px] p-5 md:p-6">{(rows??[]).length===0?<div className="py-14 text-center text-sm text-slate-400">No matching transactions.</div>:<div className="divide-y divide-white/6">{(rows??[]).map(tx=>{const profile=profileById.get(tx.user_id);const attempt=attemptByTx.get(tx.id);return <Link href={`/transactions/${tx.id}`} key={tx.id} className="group grid gap-3 py-4 md:grid-cols-[1.3fr_.9fr_.7fr_.8fr_auto] md:items-center"><div className="min-w-0"><p className="truncate text-sm font-semibold">{titleCase(tx.kind)}</p><p className="muted mt-1 truncate text-[11px]">{tx.reference}</p></div><div><p className="text-xs">{profile?.full_name||'Unknown user'}</p><p className="muted mt-1 text-[10px]">{profile?.username?`@${profile.username}`:profile?.phone||'No identifier'}</p></div><div><p className="text-sm font-bold">{money(Number(tx.amount_minor),tx.currency)}</p><p className="muted mt-1 text-[10px]">Fee {money(Number(tx.fee_minor),tx.currency)}</p></div><div><p className={`text-xs font-semibold ${tx.status==='failed'?'text-rose-300':tx.status==='successful'?'text-emerald-300':'text-amber-300'}`}>{titleCase(tx.status)}</p>{attempt&&<p className="muted mt-1 truncate text-[10px]">Provider: {titleCase(attempt.status)}{attempt.error_code?` · ${attempt.error_code}`:''}</p>}</div><ChevronRight size={16} className="text-slate-700 group-hover:text-cyan-300"/></Link>})}</div>}</section></div></main>;
+}
