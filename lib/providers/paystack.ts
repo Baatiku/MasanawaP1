@@ -36,6 +36,15 @@ export function isPaystackConfigured() { return Boolean(process.env.PAYSTACK_SEC
 
 export type PaystackBank = { id?: number; name: string; code: string; active?: boolean; country?: string; currency?: string; type?: string };
 export type PaystackDvaProvider = { provider_slug: string; bank_id?: number; bank_name: string; id?: number };
+export type PaystackDedicatedAccount = {
+  id?: number | string;
+  account_name?: string;
+  account_number?: string;
+  currency?: string;
+  active?: boolean;
+  assigned?: boolean;
+  bank?: { name?: string; slug?: string; id?: number | string };
+};
 
 export async function listPaystackBanks() {
   const banks = await paystack<PaystackBank[]>("/bank?country=nigeria&currency=NGN&perPage=100");
@@ -45,6 +54,14 @@ export async function listPaystackBanks() {
 export async function listPaystackDvaProviders() {
   const providers = await paystack<PaystackDvaProvider[]>("/dedicated_account/available_providers");
   return providers.filter(item => item.provider_slug && item.bank_name).sort((a,b)=>a.bank_name.localeCompare(b.bank_name));
+}
+
+export async function fetchPaystackCustomer(emailOrCode: string) {
+  return paystack<{
+    customer_code?: string;
+    email?: string;
+    dedicated_account?: PaystackDedicatedAccount | null;
+  }>(`/customer/${encodeURIComponent(emailOrCode)}`);
 }
 
 export async function assignPaystackDedicatedAccount(input: {
