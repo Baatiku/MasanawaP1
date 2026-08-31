@@ -4,8 +4,11 @@ import { ArrowLeft, ArrowUpFromLine, Send, ShieldCheck } from "lucide-react";
 import { createClient } from "../../../lib/supabase/server";
 import { transferToUsername } from "../actions";
 
-export default async function WalletActionPage({params,searchParams}:{params:Promise<{action:string}>;searchParams?:Promise<{error?:string}>}) {
-  const [{action}, query] = await Promise.all([params, searchParams ?? Promise.resolve({})]);
+type WalletActionSearchParams = { error?: string };
+
+export default async function WalletActionPage({params,searchParams}:{params:Promise<{action:string}>;searchParams?:Promise<WalletActionSearchParams>}) {
+  const { action } = await params;
+  const query: WalletActionSearchParams = searchParams ? await searchParams : {};
   if (!['transfer','withdraw'].includes(action)) redirect('/wallet');
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
