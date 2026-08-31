@@ -22,12 +22,14 @@ export default async function TransactionReceiptPage({ params }: { params: Promi
     .eq("id", id).eq("user_id", userId).maybeSingle();
   if (!tx) notFound();
 
-  const [serviceResult, cryptoResult] = await Promise.all([
+  const [serviceResult, cryptoResult, withdrawalResult] = await Promise.all([
     supabase.from("service_orders").select("service_type,recipient,product_code,provider,provider_reference").eq("transaction_id", id).maybeSingle(),
     supabase.from("crypto_orders").select("side,asset_from,asset_to,amount_from_minor,amount_to_minor,rate,provider,provider_reference").eq("transaction_id", id).maybeSingle(),
+    supabase.from("withdrawal_requests").select("bank_name,account_number,account_name,provider,provider_reference,transfer_code,provider_status,failure_reason").eq("transaction_id", id).maybeSingle(),
   ]);
   const service = serviceResult.data;
   const crypto = cryptoResult.data;
+  const withdrawal = withdrawalResult.data;
   const metadata = safeMeta(tx.metadata);
   const incoming = tx.kind === "transfer" && metadata.direction === "incoming";
   const positive = ["deposit", "refund"].includes(tx.kind) || incoming;
@@ -54,6 +56,16 @@ export default async function TransactionReceiptPage({ params }: { params: Promi
     details.push(["Asset pair", `${crypto.asset_from} → ${crypto.asset_to}`]);
     if (crypto.provider) details.push(["Provider", crypto.provider]);
     if (crypto.provider_reference) details.push(["Provider reference", crypto.provider_reference]);
+  }
+  if (withdrawal) {
+    details.push(["Bank", withdrawal.bank_name]);
+    details.push(["Account name", withdrawal.account_name]);
+    details.push(["Account number", `••••••${withdrawal.account_number.slice(-4)}`]);
+    details.push(["Payout provider", humanize(withdrawal.provider)]);
+    if (withdrawal.provider_status) details.push(["Provider status", humanize(withdrawal.provider_status)]);
+    if (withdrawal.provider_reference) details.push(["Provider reference", withdrawal.provider_reference]);
+    if (withdrawal.transfer_code) details.push(["Transfer code", withdrawal.transfer_code]);
+    if (withdrawal.failure_reason && tx.status === "failed") details.push(["Failure reason", withdrawal.failure_reason]);
   }
 
   return <main className="min-h-screen px-5 py-6 md:px-8 lg:py-10"><div className="mx-auto max-w-2xl">
