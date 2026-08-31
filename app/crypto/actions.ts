@@ -14,8 +14,9 @@ function parseAssetMinor(value: string, asset: string) {
   if (!/^\d+(?:\.\d+)?$/.test(normalized)) return null;
   const [whole, fraction = ""] = normalized.split(".");
   if (fraction.length > decimals) return null;
-  const minor = BigInt(whole) * (10n ** BigInt(decimals)) + BigInt((fraction + "0".repeat(decimals)).slice(0, decimals));
-  if (minor <= 0n || minor > BigInt(Number.MAX_SAFE_INTEGER)) return null;
+  const scale = BigInt(10) ** BigInt(decimals);
+  const minor = BigInt(whole) * scale + BigInt((fraction + "0".repeat(decimals)).slice(0, decimals));
+  if (minor <= BigInt(0) || minor > BigInt(Number.MAX_SAFE_INTEGER)) return null;
   return Number(minor);
 }
 
