@@ -9,10 +9,12 @@ const supportedAssets = new Set(["BTC", "ETH", "USDT"]);
 export async function createCryptoBuyOrder(formData: FormData) {
   const asset = String(formData.get("asset") ?? "").trim().toUpperCase();
   const amountNgn = Number(String(formData.get("amount") ?? "0").replace(/,/g, ""));
+  const pin = String(formData.get("pin") ?? "").trim();
 
   if (!supportedAssets.has(asset) || !Number.isFinite(amountNgn) || amountNgn < 100) {
     redirect(`/crypto/buy?error=${encodeURIComponent("Choose BTC, ETH or USDT and enter at least ₦100.")}`);
   }
+  if (!/^\d{6}$/.test(pin)) redirect(`/crypto/buy?error=${encodeURIComponent("Enter your 6-digit transaction PIN.")}`);
 
   const supabase = await createClient();
   const { data: claimsData } = await supabase.auth.getClaims();
@@ -22,6 +24,7 @@ export async function createCryptoBuyOrder(formData: FormData) {
     p_asset: asset,
     p_amount_ngn_minor: Math.round(amountNgn * 100),
     p_idempotency_key: randomUUID(),
+    p_pin: pin,
   });
 
   if (error) redirect(`/crypto/buy?error=${encodeURIComponent(error.message)}`);
