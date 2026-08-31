@@ -18,7 +18,7 @@ export default async function RegisterPage({ searchParams }: { searchParams?: Pr
             <Field name="email" label="Email address" placeholder="you@example.com" type="email" icon={Mail} />
             <Field name="password" label="Password" placeholder="At least 8 characters" type="password" icon={LockKeyhole} />
             <Field name="referral_code" label="Referral code (optional)" placeholder="Enter referral code" icon={Gift} defaultValue={referralCode} required={false} />
-            <label className="flex gap-3 text-xs leading-5 text-slate-400"><input required type="checkbox" className="mt-1 accent-cyan-300" /> <span>I agree to the Terms of Service and Privacy Policy.</span></label>
+            <label className="flex gap-3 text-xs leading-5 text-slate-400"><input required type="checkbox" className="mt-1 accent-cyan-300" /> <span>I agree to the <Link href="/terms" target="_blank" className="font-semibold text-cyan-300 hover:underline">Terms of Service</Link> and <Link href="/privacy" target="_blank" className="font-semibold text-cyan-300 hover:underline">Privacy Notice</Link>.</span></label>
             <button type="submit" className="flex h-13 w-full items-center justify-center gap-2 rounded-2xl bg-cyan-300 text-sm font-bold text-slate-950 transition hover:bg-cyan-200">Create account <ArrowRight size={17} /></button>
           </form>
           <p className="muted mt-8 text-center text-sm">Already have an account? <Link href="/login" className="font-semibold text-cyan-300">Sign in</Link></p>
