@@ -2,11 +2,11 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, CheckCircle2, ChevronRight, Download, Filter, ReceiptText, Search } from "lucide-react";
 import { createClient } from "../../lib/supabase/server";
+import { formatLedgerAmount } from "../../lib/ledger-format";
 
 const positiveKinds = new Set(["deposit", "refund"]);
 const statuses = ["", "pending", "processing", "successful", "failed", "reversed", "cancelled"] as const;
 const kinds = ["", "deposit", "withdrawal", "transfer", "airtime", "data", "electricity", "cable", "gift_card", "telegram", "crypto_buy", "crypto_sell", "crypto_swap", "refund", "adjustment"] as const;
-function money(minor: number, currency: string) { return new Intl.NumberFormat("en-NG", { style: "currency", currency, minimumFractionDigits: 2 }).format(minor / 100); }
 function humanize(value: string) { return value.replaceAll("_", " ").replace(/\b\w/g, c => c.toUpperCase()); }
 function isIncomingTransfer(kind: string, metadata: unknown) {
   if (kind !== "transfer" || !metadata || typeof metadata !== "object" || Array.isArray(metadata)) return false;
@@ -61,7 +61,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams?
             {(rows ?? []).length === 0 ? <div className="py-14 text-center"><p className="text-sm font-semibold">No matching transactions</p><p className="muted mt-2 text-xs">Try changing the filters or complete a transaction first.</p></div> : (rows ?? []).map(tx => {
               const positive = positiveKinds.has(tx.kind) || isIncomingTransfer(tx.kind, tx.metadata);
               const title = tx.kind === "transfer" ? (positive ? "Transfer received" : "Transfer sent") : humanize(tx.kind);
-              return <Link href={`/transactions/${tx.id}`} key={tx.id} className="group flex items-center justify-between gap-4 rounded-2xl py-4 transition hover:bg-white/[.025] md:px-2"><div className="flex min-w-0 items-center gap-3"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-cyan-300/8 text-cyan-300"><ReceiptText size={18}/></div><div className="min-w-0"><p className="truncate text-sm font-semibold">{title}</p><p className="muted mt-1 truncate text-[11px]">{tx.reference} · {new Date(tx.created_at).toLocaleString("en-NG")}</p></div></div><div className="flex items-center gap-3"><div className="text-right"><p className={`text-sm font-bold ${positive ? "text-emerald-300" : ""}`}>{positive ? "+" : "-"}{money(Number(tx.amount_minor), tx.currency)}</p><p className={`mt-1 text-[10px] ${tx.status === "successful" ? "text-emerald-300/80" : tx.status === "failed" ? "text-rose-300" : "text-amber-300"}`}>{humanize(tx.status)}{Number(tx.fee_minor) > 0 ? ` · Fee ${money(Number(tx.fee_minor), tx.currency)}` : ""}</p></div><ChevronRight size={16} className="text-slate-700 transition group-hover:text-cyan-300"/></div></Link>;
+              return <Link href={`/transactions/${tx.id}`} key={tx.id} className="group flex items-center justify-between gap-4 rounded-2xl py-4 transition hover:bg-white/[.025] md:px-2"><div className="flex min-w-0 items-center gap-3"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-cyan-300/8 text-cyan-300"><ReceiptText size={18}/></div><div className="min-w-0"><p className="truncate text-sm font-semibold">{title}</p><p className="muted mt-1 truncate text-[11px]">{tx.reference} · {new Date(tx.created_at).toLocaleString("en-NG")}</p></div></div><div className="flex items-center gap-3"><div className="text-right"><p className={`text-sm font-bold ${positive ? "text-emerald-300" : ""}`}>{positive ? "+" : "-"}{formatLedgerAmount(Number(tx.amount_minor), tx.currency)}</p><p className={`mt-1 text-[10px] ${tx.status === "successful" ? "text-emerald-300/80" : tx.status === "failed" ? "text-rose-300" : "text-amber-300"}`}>{humanize(tx.status)}{Number(tx.fee_minor) > 0 ? ` · Fee ${formatLedgerAmount(Number(tx.fee_minor), tx.currency)}` : ""}</p></div><ChevronRight size={16} className="text-slate-700 transition group-hover:text-cyan-300"/></div></Link>;
             })}
           </div>
         </section>
