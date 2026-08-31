@@ -20,8 +20,9 @@ function parseAssetMinor(value: string, asset: string) {
   if (decimals == null || !/^\d+(?:\.\d+)?$/.test(value.trim())) return null;
   const [whole, fraction = ""] = value.trim().split(".");
   if (fraction.length > decimals) return null;
-  const result = BigInt(whole) * (10n ** BigInt(decimals)) + BigInt((fraction + "0".repeat(decimals)).slice(0, decimals));
-  return result > 0n && result <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(result) : null;
+  const scale = BigInt(10) ** BigInt(decimals);
+  const result = BigInt(whole) * scale + BigInt((fraction + "0".repeat(decimals)).slice(0, decimals));
+  return result > BigInt(0) && result <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(result) : null;
 }
 
 export async function settleCryptoOrder(formData: FormData) {
