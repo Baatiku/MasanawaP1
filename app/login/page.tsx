@@ -19,7 +19,7 @@ export default async function LoginPage({ searchParams }: { searchParams?: Promi
           {params.message && <div className="mt-5 rounded-2xl border border-emerald-400/20 bg-emerald-400/8 px-4 py-3 text-sm text-emerald-200">{params.message}</div>}
           <form action={login} className="mt-8 space-y-5">
             <Field name="email" label="Email address" type="email" placeholder="you@example.com" icon={Mail} />
-            <Field name="password" label="Password" type="password" placeholder="Enter your password" icon={LockKeyhole} />
+            <div><div className="mb-2 flex items-center justify-between"><label htmlFor="password" className="text-xs font-semibold text-slate-300">Password</label><Link href="/forgot-password" className="text-xs font-semibold text-cyan-300">Forgot password?</Link></div><div className="flex h-13 items-center gap-3 rounded-2xl border border-white/9 bg-white/[.035] px-4 focus-within:border-cyan-300/35"><LockKeyhole size={17} className="text-slate-500"/><input id="password" name="password" required type="password" autoComplete="current-password" placeholder="Enter your password" className="h-full min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-600"/></div></div>
             <button type="submit" className="flex h-13 w-full items-center justify-center gap-2 rounded-2xl bg-cyan-300 text-sm font-bold text-slate-950 transition hover:bg-cyan-200">Sign in <ArrowRight size={17} /></button>
           </form>
           <p className="muted mt-8 text-center text-sm">New to Masanawa? <Link href="/register" className="font-semibold text-cyan-300">Create an account</Link></p>
@@ -30,5 +30,5 @@ export default async function LoginPage({ searchParams }: { searchParams?: Promi
 }
 
 function Field({ name, label, type, placeholder, icon: Icon }: { name: string; label: string; type: string; placeholder: string; icon: typeof Mail }) {
-  return <div><label htmlFor={name} className="mb-2 block text-xs font-semibold text-slate-300">{label}</label><div className="flex h-13 items-center gap-3 rounded-2xl border border-white/9 bg-white/[.035] px-4 focus-within:border-cyan-300/35"><Icon size={17} className="text-slate-500" /><input id={name} name={name} required type={type} placeholder={placeholder} className="h-full min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-600" /></div></div>;
+  return <div><label htmlFor={name} className="mb-2 block text-xs font-semibold text-slate-300">{label}</label><div className="flex h-13 items-center gap-3 rounded-2xl border border-white/9 bg-white/[.035] px-4 focus-within:border-cyan-300/35"><Icon size={17} className="text-slate-500" /><input id={name} name={name} required type={type} autoComplete={type === "email" ? "email" : undefined} placeholder={placeholder} className="h-full min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-600" /></div></div>;
 }
