@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ChevronRight, KeyRound, LifeBuoy, LogOut, ShieldCheck, UserRound, WalletCards } from "lucide-react";
+import { ChevronRight, Gift, KeyRound, LifeBuoy, LogOut, ShieldCheck, UserRound, WalletCards } from "lucide-react";
 import AppShell from "../components/AppShell";
 import { createClient } from "../../lib/supabase/server";
 import { logout } from "../auth/actions";
@@ -9,7 +9,8 @@ const rows = [
   {label:"Personal information", text:"Name, email and phone", icon:UserRound, href:"/profile/personal"},
   {label:"Verification", text:"Identity and transaction limits", icon:ShieldCheck, href:"/profile/verification"},
   {label:"Security & PIN", text:"Password, PIN and sessions", icon:KeyRound, href:"/profile/security"},
-  {label:"Wallet settings", text:"Accounts and preferences", icon:WalletCards, href:"/wallet"},
+  {label:"Referrals & rewards", text:"Invite friends and track earned rewards", icon:Gift, href:"/profile/referrals"},
+  {label:"Wallet settings", text:"Accounts, beneficiaries and preferences", icon:WalletCards, href:"/wallet"},
   {label:"Help & support", text:"Get assistance with Masanawa", icon:LifeBuoy, href:"/profile/support"},
 ];
 
