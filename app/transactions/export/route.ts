@@ -49,7 +49,7 @@ export async function GET(request: Request) {
   return new NextResponse(`\uFEFF${lines.join("\r\n")}`, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="masanawa-transactions-${date}.csv"`,
+      "Content-Disposition": `attachment; filename="perfect-naira-transactions-${date}.csv"`,
       "Cache-Control": "private, no-store",
     },
   });

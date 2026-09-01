@@ -1,6 +1,6 @@
-# Masanawa
+# Perfect Naira
 
-Masanawa is a responsive fintech web application for wallet funding, transfers, digital services, bill payments, and digital-asset experiences.
+Perfect Naira is a responsive fintech web application for wallet funding, transfers, digital services, bill payments, and digital-asset experiences.
 
 ## Current architecture
 
@@ -18,7 +18,8 @@ Masanawa is a responsive fintech web application for wallet funding, transfers, 
 
 ## Core routes
 
-- `/` — authenticated dashboard
+- `/` — public Perfect Naira welcome page (signed-in users are redirected to `/dashboard`)
+- `/dashboard` — authenticated account overview
 - `/login` — sign in
 - `/register` — account creation
 - `/wallet` — live ledger-backed wallet

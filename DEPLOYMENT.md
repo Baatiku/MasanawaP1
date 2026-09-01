@@ -1,10 +1,10 @@
-# Masanawa Production Deployment Checklist
+# Perfect Naira Production Deployment Checklist
 
-Masanawa is designed to fail closed. Do not activate a payment/provider path until the matching server credentials, callback URL, database route and end-to-end verification are complete.
+Perfect Naira is designed to fail closed. Do not activate a payment/provider path until the matching server credentials, callback URL, database route and end-to-end verification are complete.
 
 ## 1. Vercel project
 
-Import `Baatiku/MasanawaP1` into the intended Vercel team and use the repository root as the project root. The application is Next.js and requires Node.js 22 or newer.
+Import `Baatiku/Perfect NairaP1` into the intended Vercel team and use the repository root as the project root. The application is Next.js and requires Node.js 22 or newer.
 
 Set `NEXT_PUBLIC_APP_URL` to the final HTTPS production origin after the Vercel domain or custom domain is known.
 
@@ -32,7 +32,7 @@ Never prefix server secrets with `NEXT_PUBLIC_`, commit them to Git, or expose t
 
 ## 3. Supabase
 
-The production project is `Masanawa` (`pcgqwjehkhjcsrkdigjv`, Paris). Confirm all migrations are applied and run Supabase security/performance advisors after schema changes.
+The production project is `Perfect Naira` (`pcgqwjehkhjcsrkdigjv`, Paris). Confirm all migrations are applied and run Supabase security/performance advisors after schema changes.
 
 Before go-live verify:
 

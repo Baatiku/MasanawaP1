@@ -1,14 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #07111f;
-  --panel: #0d1a2b;
-  --panel-2: #112236;
-  --line: rgba(255,255,255,.08);
-  --muted: #8fa3ba;
-  --text: #f7fbff;
-  --cyan: #22c3ee;
-  --cyan-2: #0ea5e9;
+  --bg: #01130c;
+  --bg-elevated: #041d14;
+  --panel: #072b1e;
+  --panel-2: #0a3827;
+  --panel-3: #0d4630;
+  --line: rgba(132, 196, 157, .16);
+  --line-strong: rgba(177, 215, 190, .24);
+  --muted: #95b5a5;
+  --text: #fbfdfb;
+  --brand: #22c55e;
+  --brand-strong: #16a34a;
+  --gold: #d8b45b;
+  --gold-soft: #f1d58c;
+  --success: #34d399;
 }
 
 * { box-sizing: border-box; }
@@ -16,8 +22,8 @@ html { background: var(--bg); scroll-behavior: smooth; }
 body {
   margin: 0;
   background:
-    radial-gradient(circle at 80% -10%, rgba(34,195,238,.14), transparent 32%),
-    radial-gradient(circle at -10% 30%, rgba(14,165,233,.08), transparent 26%),
+    radial-gradient(circle at 76% -15%, rgba(24, 150, 76, .16), transparent 31%),
+    radial-gradient(circle at -10% 24%, rgba(216, 180, 91, .06), transparent 27%),
     var(--bg);
   color: var(--text);
   min-height: 100vh;
@@ -26,23 +32,68 @@ body {
 button, input, select, textarea { font: inherit; }
 button, summary, a { -webkit-tap-highlight-color: transparent; }
 a { color: inherit; text-decoration: none; }
-:focus-visible { outline: 2px solid rgba(34,195,238,.9); outline-offset: 3px; }
-::selection { background: rgba(34,195,238,.28); }
+:focus-visible { outline: 2px solid rgba(52, 211, 153, .9); outline-offset: 3px; }
+::selection { background: rgba(34, 197, 94, .3); }
 
 .muted { color: var(--muted); }
 .panel {
-  background: linear-gradient(180deg, rgba(17,34,54,.9), rgba(11,25,42,.94));
+  background: linear-gradient(145deg, rgba(8, 48, 33, .97), rgba(3, 29, 20, .99));
   border: 1px solid var(--line);
-  box-shadow: 0 24px 60px rgba(0,0,0,.18);
+  box-shadow: 0 20px 55px rgba(0, 5, 18, .24), inset 0 1px 0 rgba(255, 255, 255, .025);
 }
 .soft-panel {
-  background: rgba(255,255,255,.035);
-  border: 1px solid rgba(255,255,255,.065);
+  background: rgba(112, 186, 139, .05);
+  border: 1px solid rgba(132, 196, 157, .13);
 }
 .glass {
-  background: rgba(7,17,31,.76);
-  backdrop-filter: blur(16px);
+  background: rgba(1, 19, 12, .88);
+  backdrop-filter: blur(22px);
 }
+
+.app-card {
+  background: linear-gradient(145deg, rgba(8, 48, 33, .98), rgba(3, 29, 20, .99));
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  box-shadow: 0 20px 55px rgba(0, 5, 18, .24), inset 0 1px 0 rgba(255, 255, 255, .025);
+}
+
+.balance-card {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(216, 180, 91, .16), transparent 31%),
+    linear-gradient(135deg, #0b5b35 0%, #08492d 38%, #052a1d 100%);
+  border: 1px solid rgba(216, 180, 91, .55);
+  border-radius: 22px;
+  box-shadow: 0 22px 70px rgba(0, 20, 11, .38), inset 0 1px 0 rgba(255, 255, 255, .09);
+}
+
+.balance-card::after {
+  content: "";
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  right: -115px;
+  top: -195px;
+  border-radius: 50%;
+  border: 1px solid rgba(241, 213, 140, .14);
+  box-shadow: 0 0 0 24px rgba(241, 213, 140, .025), 0 0 0 56px rgba(34, 197, 94, .022), 0 0 0 92px rgba(34, 197, 94, .016);
+  pointer-events: none;
+}
+
+.service-tile {
+  border: 1px solid rgba(132, 196, 157, .14);
+  background: linear-gradient(145deg, rgba(11, 58, 39, .84), rgba(5, 36, 25, .86));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .025);
+}
+
+.service-tile:hover {
+  border-color: rgba(216, 180, 91, .38);
+  background: linear-gradient(145deg, rgba(14, 76, 49, .96), rgba(7, 48, 32, .96));
+  transform: translateY(-2px);
+}
+
+.tabular { font-variant-numeric: tabular-nums; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

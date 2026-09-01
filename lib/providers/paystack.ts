@@ -92,14 +92,14 @@ export async function resolvePaystackAccount(accountNumber: string, bankCode: st
 export async function createPaystackTransferRecipient(input: { name: string; accountNumber: string; bankCode: string }) {
   return paystack<{ recipient_code: string; active?: boolean; type?: string; currency?: string }>("/transferrecipient", {
     method: "POST",
-    body: JSON.stringify({ type: "nuban", name: input.name, account_number: input.accountNumber, bank_code: input.bankCode, currency: "NGN", description: "Masanawa wallet withdrawal" }),
+    body: JSON.stringify({ type: "nuban", name: input.name, account_number: input.accountNumber, bank_code: input.bankCode, currency: "NGN", description: "Perfect Naira wallet withdrawal" }),
   });
 }
 
 export async function initiatePaystackTransfer(input: { amountMinor: number; recipientCode: string; reference: string; reason?: string }) {
   return paystack<{ transfer_code?: string; reference?: string; status?: string; id?: number | string }>("/transfer", {
     method: "POST",
-    body: JSON.stringify({ source: "balance", amount: input.amountMinor, recipient: input.recipientCode, currency: "NGN", reference: input.reference.toLowerCase(), reason: input.reason || "Masanawa wallet withdrawal" }),
+    body: JSON.stringify({ source: "balance", amount: input.amountMinor, recipient: input.recipientCode, currency: "NGN", reference: input.reference.toLowerCase(), reason: input.reason || "Perfect Naira wallet withdrawal" }),
   });
 }
 
