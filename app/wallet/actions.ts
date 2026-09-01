@@ -51,7 +51,7 @@ export async function requestVirtualAccount(formData: FormData) {
   const bvn = String(formData.get("bvn") ?? "").trim();
   const consent = formData.get("consent") === "on";
   if (!isPaystackConfigured() || !process.env.SUPABASE_SECRET_KEY) redirect(`/wallet/fund?error=${encodeURIComponent("Virtual account provisioning is not configured yet.")}`);
-  if (!consent) redirect(`/wallet/fund?error=${encodeURIComponent("You must consent before Masanawa can send identity details to the virtual-account provider.")}`);
+  if (!consent) redirect(`/wallet/fund?error=${encodeURIComponent("You must consent before Perfect Naira can send identity details to the virtual-account provider.")}`);
   if (!preferredBank || !bankCode || !/^\d{10}$/.test(bankAccountNumber) || !/^\d{11}$/.test(bvn)) redirect(`/wallet/fund?error=${encodeURIComponent("Enter a valid bank account, 11-digit BVN and virtual-account provider.")}`);
 
   const supabase = await createClient();
@@ -168,7 +168,7 @@ export async function createBankWithdrawal(formData: FormData) {
     if (!recipient.recipient_code) throw new Error("Payout provider did not return a recipient code.");
     if (saveBeneficiary) await admin.from("beneficiaries").update({ recipient_code: recipient.recipient_code, updated_at: new Date().toISOString() }).eq("user_id", userId).eq("bank_code", bankCode).eq("account_number", accountNumber);
     const providerReference = reference.toLowerCase();
-    const transfer = await initiatePaystackTransfer({ amountMinor, recipientCode: recipient.recipient_code, reference: providerReference, reason: `Masanawa withdrawal ${reference}` });
+    const transfer = await initiatePaystackTransfer({ amountMinor, recipientCode: recipient.recipient_code, reference: providerReference, reason: `Perfect Naira withdrawal ${reference}` });
     const providerStatus = String(transfer.status ?? "pending").toLowerCase();
     if (providerStatus === "success") {
       const { error: settleError } = await admin.rpc("settle_withdrawal_success", { p_transaction_id: transactionId, p_provider_reference: transfer.reference ?? providerReference, p_transfer_code: transfer.transfer_code ?? "" });

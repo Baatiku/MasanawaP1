@@ -11,7 +11,7 @@ export async function login(formData: FormData) {
   if (!email || !password) redirect("/login?error=Email%20and%20password%20are%20required");
   const supabase = await createClient(); const { error } = await supabase.auth.signInWithPassword({ email, password }); if (error) redirect(`/login?error=${encodeURIComponent(error.message)}`);
   const { data: claimsData } = await supabase.auth.getClaims(); const userId = claimsData?.claims?.sub;
-  if (userId) { const { data: closure } = await supabase.from("account_closure_requests").select("status").eq("user_id", userId).eq("status", "approved").limit(1).maybeSingle(); if (closure) { await supabase.auth.signOut(); redirect(`/login?error=${encodeURIComponent("This Masanawa account has been closed. Contact support if you believe this is an error.")}`); } }
+  if (userId) { const { data: closure } = await supabase.from("account_closure_requests").select("status").eq("user_id", userId).eq("status", "approved").limit(1).maybeSingle(); if (closure) { await supabase.auth.signOut(); redirect(`/login?error=${encodeURIComponent("This Perfect Naira account has been closed. Contact support if you believe this is an error.")}`); } }
   redirect("/dashboard");
 }
 
