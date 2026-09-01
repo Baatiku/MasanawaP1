@@ -32,7 +32,7 @@ export default async function ReferralPage() {
   const totalEarned = rewarded.reduce((sum, row) => sum + Number(row.reward_minor ?? 0), 0);
   const referralLink = code ? `${appUrl()}/register?ref=${encodeURIComponent(code)}` : `${appUrl()}/register`;
 
-  return <main className="min-h-screen px-5 py-6 md:px-8 lg:py-10"><div className="mx-auto max-w-3xl">
+  return <div className="w-full"><div className="max-w-6xl">
     <Link href="/profile" className="muted inline-flex items-center gap-2 text-sm hover:text-white"><ArrowLeft size={17}/>Back to profile</Link>
     <div className="mt-7"><div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-400/10 text-emerald-400"><Gift size={22}/></div><h1 className="mt-5 text-2xl font-bold md:text-3xl">Referrals & rewards</h1><p className="muted mt-2 text-sm">Invite people to Perfect Naira and track eligible rewards without exposing their private account details.</p></div>
 
@@ -41,7 +41,7 @@ export default async function ReferralPage() {
     <div className="mt-5 grid gap-4 sm:grid-cols-3"><Stat icon={UsersRound} label="Total referrals" value={String(rows.length)}/><Stat icon={WalletCards} label="Pending qualification" value={String(pending.length)}/><Stat icon={Gift} label="Rewards earned" value={money(totalEarned)}/></div>
 
     <section className="panel mt-5 rounded-[30px] p-5 md:p-6"><div><h2 className="font-bold">Referral activity</h2><p className="muted mt-1 text-xs">Only status and reward information is shown.</p></div><div className="mt-4 divide-y divide-white/6">{rows.length === 0 ? <div className="py-10 text-center"><p className="text-sm font-semibold">No referrals yet</p><p className="muted mt-2 text-xs">Share your referral link to start tracking invitations.</p></div> : rows.map((row, index) => <div key={`${row.created_at}-${index}`} className="flex items-center justify-between gap-4 py-4"><div><p className="text-sm font-semibold">Referral #{rows.length-index}</p><p className="muted mt-1 text-[11px]">Joined {new Date(row.created_at).toLocaleDateString("en-NG")}</p></div><div className="text-right"><span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${row.status === "rewarded" ? "border-emerald-300/20 bg-emerald-300/[.07] text-emerald-300" : row.status === "rejected" ? "border-rose-300/20 bg-rose-300/[.07] text-rose-300" : "border-amber-300/20 bg-amber-300/[.07] text-amber-300"}`}>{row.status.toUpperCase()}</span>{Number(row.reward_minor) > 0 ? <p className="mt-2 text-xs font-bold text-emerald-400">{money(Number(row.reward_minor))}</p> : null}</div></div>)}</div></section>
-  </div></main>;
+  </div></div>;
 }
 
 function Stat({ icon: Icon, label, value }: { icon: typeof Gift; label: string; value: string }) {

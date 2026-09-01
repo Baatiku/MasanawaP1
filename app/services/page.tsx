@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Bitcoin, ChevronRight, Gift, Phone, Send, Sparkles, Tv, Wifi, Zap } from "lucide-react";
-import AppShell from "../components/AppShell";
 
 const services = [
   { name: "Airtime", text: "Instant recharge across Nigerian mobile networks.", icon: Phone, href: "/services/airtime", tone: "bg-indigo-400/10 text-indigo-300", tag: "Instant" },
@@ -13,7 +12,7 @@ const services = [
 ];
 
 export default function ServicesPage() {
-  return <AppShell active="Services" title="Services" subtitle="Bills, VTU and digital services in one place.">
+  return <>
     <div className="mb-5 flex items-end justify-between gap-4 md:mb-6"><div><p className="text-sm font-medium text-slate-400">Pay and recharge</p><h1 className="mt-0.5 text-2xl font-extrabold tracking-[-.04em] md:text-[28px]">Everyday services</h1></div><span className="hidden items-center gap-2 rounded-xl border border-emerald-400/15 bg-emerald-400/[.055] px-3 py-2 text-[10px] font-bold text-emerald-400 sm:flex"><Sparkles size={14}/>Secure wallet checkout</span></div>
     <section className="app-card overflow-hidden p-4 sm:p-5 lg:p-6">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -25,5 +24,5 @@ export default function ServicesPage() {
         ))}
       </div>
     </section>
-  </AppShell>;
+  </>;
 }

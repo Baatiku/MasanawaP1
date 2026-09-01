@@ -31,7 +31,7 @@ export default async function CryptoActionPage({ params, searchParams }: { param
   const submit = swap ? createCryptoSwapOrder : createCryptoSellOrder;
   const idempotencyKey = randomUUID();
 
-  return <main className="min-h-screen px-5 py-6 md:px-8 lg:py-10"><div className="mx-auto max-w-2xl">
+  return <div className="w-full"><div className="max-w-5xl">
     <Link href="/crypto" className="muted inline-flex items-center gap-2 text-sm hover:text-white"><ArrowLeft size={17}/>Back to crypto</Link>
     <div className="mt-7"><div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-400/10 text-emerald-400"><Icon size={22}/></div><h1 className="mt-5 text-2xl font-bold md:text-3xl">{title}</h1><p className="muted mt-2 text-sm">{swap ? 'Exchange one settled Perfect Naira asset balance for another.' : 'Convert a settled Perfect Naira crypto balance into your naira wallet.'}</p></div>
     {query.error ? <div className="mt-6 rounded-2xl border border-rose-400/20 bg-rose-400/8 px-4 py-3 text-sm text-rose-200">{query.error}</div> : null}
@@ -43,5 +43,5 @@ export default async function CryptoActionPage({ params, searchParams }: { param
       <div className="mt-5 flex items-start gap-3 rounded-2xl bg-emerald-400/[.045] p-4"><ShieldCheck className="mt-0.5 shrink-0 text-emerald-400" size={17}/><p className="muted text-xs leading-5">The amount is reserved from your asset wallet atomically. Only a server-side provider settlement can release the destination asset or naira proceeds.</p></div>
       <button type="submit" className="mt-6 flex w-full items-center justify-center rounded-2xl bg-emerald-400 py-3.5 text-sm font-bold text-slate-950">Continue to provider execution</button>
     </form>}
-  </div></main>;
+  </div></div>;
 }

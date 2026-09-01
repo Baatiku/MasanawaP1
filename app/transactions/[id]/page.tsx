@@ -69,11 +69,11 @@ export default async function TransactionReceiptPage({ params }: { params: Promi
     if (withdrawal.failure_reason && tx.status === "failed") details.push(["Failure reason", withdrawal.failure_reason]);
   }
 
-  return <main className="min-h-screen px-5 py-6 md:px-8 lg:py-10"><div className="mx-auto max-w-2xl">
+  return <div className="w-full"><div className="max-w-5xl">
     <Link href="/transactions" className="muted inline-flex items-center gap-2 text-sm hover:text-white"><ArrowLeft size={17}/>Back to transactions</Link>
     <section className="panel mt-7 overflow-hidden rounded-[30px]">
       <div className="border-b border-white/7 p-6 text-center md:p-8"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-[20px] bg-white/[.04]">{statusIcon}</div><p className="muted mt-4 text-xs uppercase tracking-[.14em]">Transaction receipt</p><h1 className="mt-2 text-2xl font-extrabold">{title}</h1><p className={`mt-3 text-3xl font-extrabold tracking-[-.04em] ${positive?"text-emerald-300":""}`}>{positive?"+":"-"}{formatLedgerAmount(Number(tx.amount_minor),tx.currency)}</p></div>
       <div className="p-5 md:p-7"><div className="divide-y divide-white/6">{details.map(([label,value], index)=><div key={`${label}-${index}`} className="flex items-start justify-between gap-5 py-3.5"><span className="muted text-xs">{label}</span><span className="max-w-[65%] break-all text-right text-xs font-semibold text-slate-200">{value}</span></div>)}</div><div className="mt-6 flex items-start gap-3 rounded-2xl bg-emerald-400/[.045] p-4"><ReceiptText size={17} className="mt-0.5 shrink-0 text-emerald-400"/><p className="muted text-xs leading-5">This receipt is generated from your authenticated Perfect Naira transaction record. Internal ledger-account details and provider credentials are intentionally not exposed.</p></div></div>
     </section>
-  </div></main>;
+  </div></div>;
 }

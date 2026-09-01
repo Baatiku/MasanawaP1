@@ -35,7 +35,7 @@ export default async function ServiceDetailPage({params,searchParams}:{params:Pr
     .order("network")
     .order("amount_minor");
 
-  return <main className="min-h-screen px-5 py-6 md:px-8 lg:py-10"><div className="mx-auto max-w-3xl">
+  return <div className="w-full"><div className="max-w-6xl">
     <Link href="/services" className="muted inline-flex items-center gap-2 text-sm hover:text-white"><ArrowLeft size={17}/>Back to services</Link>
     <div className="mt-7"><div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-400/10 text-emerald-400"><Icon size={22}/></div><h1 className="mt-5 text-2xl font-bold md:text-3xl">{item.title}</h1><p className="muted mt-2 text-sm">{item.subtitle}</p></div>
     {query.error && <div className="mt-6 rounded-2xl border border-rose-400/20 bg-rose-400/8 px-4 py-3 text-sm text-rose-200">{query.error}</div>}
@@ -51,5 +51,5 @@ export default async function ServiceDetailPage({params,searchParams}:{params:Pr
         <button type="submit" className="mt-5 flex w-full items-center justify-center rounded-2xl bg-emerald-400 py-3.5 text-sm font-bold text-slate-950">Review order</button>
       </form>;
     })}</div>}
-  </div></main>;
+  </div></div>;
 }

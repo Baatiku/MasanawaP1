@@ -35,7 +35,7 @@ export default async function FundWalletPage({ searchParams }: { searchParams?: 
     catch (error) { providerLoadError = error instanceof Error ? error.message : "Unable to load virtual-account providers"; }
   }
 
-  return <main className="min-h-screen px-5 py-6 md:px-8 lg:py-10"><div className="mx-auto max-w-2xl">
+  return <div className="w-full"><div className="max-w-5xl">
     <Link href="/wallet" className="muted inline-flex items-center gap-2 text-sm hover:text-white"><ArrowLeft size={17}/>Back to wallet</Link>
     <div className="mt-7"><p className="muted text-sm">Fund Perfect Naira</p><h1 className="mt-1 text-2xl font-bold md:text-3xl">Add money to your wallet</h1><p className="muted mt-2 text-sm">Use secure Paystack checkout or a dedicated bank account once provisioned.</p></div>
     {params.error && <div className="mt-6 rounded-2xl border border-rose-400/20 bg-rose-400/8 px-4 py-3 text-sm text-rose-200">{params.error}</div>}
@@ -50,5 +50,5 @@ export default async function FundWalletPage({ searchParams }: { searchParams?: 
 
     <div className="mt-5 flex gap-3 rounded-2xl border border-emerald-400/10 bg-emerald-400/[.05] p-4"><ShieldCheck className="mt-0.5 shrink-0 text-emerald-400" size={18}/><p className="muted text-xs leading-5">Neither a checkout request nor a virtual-account request changes your balance. Only a verified signed provider event can invoke the server-only balanced deposit settlement.</p></div>
     {intents.length > 0 && <section className="panel mt-5 rounded-[30px] p-5 md:p-6"><h2 className="text-sm font-bold">Recent funding requests</h2><div className="mt-3 divide-y divide-white/6">{intents.map(intent=><div key={intent.id} className="flex items-center justify-between py-3"><div><p className="text-sm font-semibold">{intent.reference}</p><p className="muted mt-1 text-[11px]">{new Date(intent.created_at).toLocaleString("en-NG")}</p></div><div className="text-right"><p className="text-sm font-bold">{money(Number(intent.amount_minor),intent.currency)}</p><p className="mt-1 text-[10px] text-amber-300">{intent.status}</p></div></div>)}</div></section>}
-  </div></main>;
+  </div></div>;
 }
